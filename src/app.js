@@ -191,9 +191,98 @@ function loadPageData(page) {
   }
 }
 
-// ================================================================
+// 4. PASO 01 — PROMISE BÁSICA: fetch + then + catch + finally
+
+//  SOLUCIÓN COMPLETA: Cargar 3 posts (IDs 1, 3 y 5)
+function loadSinglePost() {
+  showLoading('single-post');
+  
+  //  Array con los IDs de los posts a cargar
+  const postIds = [1, 3, 5];
+  
+  //  Crear un array de promesas
+  const promises = postIds.map(id => 
+    fetch(`${API}/posts/${id}`)
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status} - Post ${id}`);
+        return response.json();
+      })
+  );
+  
+  //  Usamos Promise.allSettled para manejar éxitos y fallos individualmente
+  Promise.allSettled(promises)
+    .then(results => {
+      const container = document.getElementById('single-post');
+      if (!container) return;
+      
+      //  Contar cuántos posts se cargaron correctamente
+      const successfulPosts = results.filter(r => r.status === 'fulfilled');
+      const failedPosts = results.filter(r => r.status === 'rejected');
+      
+      //  Si todos fallaron
+      if (successfulPosts.length === 0) {
+        container.innerHTML = `
+          <div class="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+            <strong>⚠️ No se pudieron cargar los posts</strong>
+            <p class="mt-1">Todos los intentos de carga fallaron.</p>
+          </div>
+        `;
+        return;
+      }
+    
+      //  Renderizar los posts exitosos
+      let html = `
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="chip-brand">${successfulPosts.length} de ${results.length} posts cargados</span>
+            ${failedPosts.length > 0 ? `<span class="chip-danger">${failedPosts.length} fallaron</span>` : ''}
+          </div>
+      `;
+      
+      //  Mostrar cada post
+      successfulPosts.forEach((result, index) => {
+        const post = result.value;
+        html += `
+          <article class="card card-hover p-5 animate-fade-in">
+            <div class="flex items-center justify-between gap-3 mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Post #${post.id}</span>
+              <span class="chip-success">✅ Cargado</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-sm leading-snug">
+              ${sanitizeHTML(post.title)}
+            </h3>
+            <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+              ${sanitizeHTML(post.body.substring(0, 120))}${post.body.length > 120 ? '...' : ''}
+            </p>
+          </article>
+        `;
+      });
+      
+      //  Mostrar errores específicos
+      if (failedPosts.length > 0) {
+        html += `
+          <div class="mt-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+            <strong>⚠️ Errores:</strong>
+            <ul class="mt-1 list-disc list-inside">
+              ${failedPosts.map((result, i) => `
+                <li>Post ID ${postIds[i]}: ${sanitizeHTML(String(result.reason || 'Error desconocido'))}</li>
+              `).join('')}
+            </ul>
+          </div>
+        `;
+      }
+      
+      html += `</div>`;
+      container.innerHTML = html;
+    })
+    .catch(error => {
+      //  Error general (poco probable con allSettled)
+      showError('single-post', `Error inesperado: ${error.message}`);
+    })
+    .finally(() => console.log('[Paso 1 Modificado] 3 posts cargados con allSettled.'));
+}
+
 // REPORTES
-// ================================================================
 
 let currentReportData = null;
 
