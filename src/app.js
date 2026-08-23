@@ -287,23 +287,30 @@ function loadSinglePost() {
 // Extrae las iniciales de un nombre completo ("Ana Gomez" → "AG").
 function getInitials(fullName) {
   return fullName
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(word => word[0].toUpperCase())
-    .join('');
+    .split(' ')           // Divide el nombre en palabras
+    .filter(Boolean)      // Elimina elementos vacíos
+    .slice(0, 2)          // Toma máximo 2 palabras
+    .map(word => word[0].toUpperCase()) // Primera letra mayúscula
+    .join('');            // Une las iniciales
 }
 
+// Función principal: carga y renderiza lista de usuarios
 function loadUsersList() {
+  // 1. Mostrar indicador de carga
   showLoading('users-list', 'Cargando lista de usuarios…');
+  
+  // 2. Petición a la API (limita a 6 usuarios)
   fetch(`${API}/users?_limit=6`)
-    .then(r => r.json())
-    .then(users => {
+    .then(r => r.json())  // Convertir respuesta a JSON
+    .then(users => {      // Procesar array de usuarios
       const container = document.getElementById('users-list');
       if (!container) return;
+      
+      // 3. Renderizar cada usuario como tarjeta
       container.innerHTML = users.map((user, i) => `
         <article class="card card-hover p-5 animate-fade-in">
           <div class="flex items-center gap-3">
+            <!-- 🎨 Avatar con iniciales y color dinámico -->
             <span class="w-11 h-11 rounded-full ${AVATAR_TONES[i % AVATAR_TONES.length]} flex items-center justify-center font-extrabold text-sm shrink-0">
               ${getInitials(user.name)}
             </span>
@@ -312,6 +319,7 @@ function loadUsersList() {
               <p class="text-xs font-semibold text-primary-600">@${sanitizeHTML(user.username)}</p>
             </div>
           </div>
+          <!-- 📋 Información adicional -->
           <dl class="mt-4 space-y-1.5 text-xs">
             <div class="flex justify-between gap-3">
               <dt class="text-slate-400 font-medium">Correo</dt>
@@ -323,12 +331,101 @@ function loadUsersList() {
             </div>
           </dl>
         </article>
-      `).join('');
+      `).join(''); // Unir todas las tarjetas en un solo string
     })
+    // 4. Manejar errores
     .catch(err => showError('users-list', err.message))
+    // 5. Siempre se ejecuta
     .finally(() => console.log('[Paso 2] Promesa con array completada.'));
 }
 
+// 6. PASO 03 — PROMISE.ALL: 3 peticiones atómicas en paralelo
+
+function loadCombinedData() {
+  // 1. Mostrar indicador de carga
+  showLoading('combined-data');
+
+  // 2. Promise.all con 3 peticiones en paralelo
+  Promise.all([
+    fetch(`${API}/posts/1`),          // Petición 1: Post ID 1
+    fetch(`${API}/users/1`),          // Petición 2: Usuario ID 1
+    fetch(`${API}/posts/1/comments`)  // Petición 3: Comentarios del post 1
+  ])
+    // 3. Procesar las respuestas
+    .then(async ([postRes, userRes, commentsRes]) => {
+      // ✅ Verificar que todas las respuestas sean exitosas
+      if (!postRes.ok || !userRes.ok || !commentsRes.ok) 
+        throw new Error('Error al obtener los datos');
+      
+      // Convertir todas las respuestas a JSON en paralelo
+      const [post, user, comments] = await Promise.all([
+        postRes.json(), 
+        userRes.json(), 
+        commentsRes.json()
+      ]);
+      
+      // Devolver objeto combinado
+      return { post, user, comments };
+    })
+    
+    // 4. Renderizar en la interfaz
+    .then(({ post, user, comments }) => {
+      const container = document.getElementById('combined-data');
+      if (!container) return;
+      
+      // Construir HTML con grid de 5 columnas
+      container.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <!-- Columna izquierda: post + autor (2/5) -->
+          <div class="lg:col-span-2 space-y-5">
+            <!-- 📝 Post -->
+            <div>
+              <h3 class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary-700">
+                <span class="w-2 h-2 rounded-full bg-primary-500"></span> Post
+              </h3>
+              <p class="mt-2 font-bold text-slate-900 leading-snug">${sanitizeHTML(post.title)}</p>
+              <p class="text-sm text-slate-600 mt-1 leading-relaxed">${sanitizeHTML(post.body)}</p>
+            </div>
+            
+            <!-- 👤 Autor -->
+            <div class="rounded-xl bg-primary-50 ring-1 ring-inset ring-primary-100 p-4">
+              <h3 class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary-700">
+                <span class="w-2 h-2 rounded-full bg-primary-500"></span> Autor
+              </h3>
+              <p class="mt-2 font-bold text-slate-900">${sanitizeHTML(user.name)}</p>
+              <p class="text-sm text-primary-700 font-medium">@${sanitizeHTML(user.username)}</p>
+              <p class="text-xs text-slate-500 mt-1">${sanitizeHTML(user.email)}</p>
+            </div>
+          </div>
+          
+          <!-- Columna derecha: comentarios (3/5) -->
+          <div class="lg:col-span-3">
+            <h3 class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-violet-700">
+              <span class="w-2 h-2 rounded-full bg-violet-500"></span> Comentarios (${comments.length})
+            </h3>
+            <div class="mt-3 space-y-2.5">
+              ${comments.slice(0, 4).map(comment => `
+                <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4">
+                  <div class="flex items-center justify-between gap-3">
+                    <p class="text-sm font-bold text-slate-800">${sanitizeHTML(comment.name)}</p>
+                    <span class="text-[11px] text-slate-400 truncate">${sanitizeHTML(comment.email)}</span>
+                  </div>
+                  <p class="text-sm text-slate-600 mt-1.5 leading-relaxed">${sanitizeHTML(comment.body)}</p>
+                </div>
+              `).join('')}
+              ${comments.length > 4 ? `<p class="text-xs text-slate-400 pl-1">… y ${comments.length - 4} comentarios más.</p>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    })
+    
+    // 5. Manejar errores
+    .catch(error => showError('combined-data', error.message))
+    
+    // 6.Siempre se ejecuta
+    .finally(() => console.log('[Paso 3] Promise.all completada.'));
+}
 // REPORTES
 
 let currentReportData = null;
