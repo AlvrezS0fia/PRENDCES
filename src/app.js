@@ -498,6 +498,80 @@ function loadSettledPosts() {
     .finally(() => console.log('[Paso 4] Promise.allSettled completada.'));
 }
 
+// 8. PASO 05 — PROMISE.RACE: API contra temporizador de 2 segundos
+
+function loadRaceResult() {
+  // 1. Mostrar indicador de carga con mensaje personalizado
+  showLoading('race-result', 'Iniciando la carrera…');
+
+  // 2. Competidor 1: la petición real a la API
+  const apiPromise = fetch(`${API}/posts/1`).then(r => {
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json(); // 📦 Convertir a JSON
+  });
+
+  // 3. Competidor 2: un temporizador que rechaza a los 2 segundos
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('⏰ Tiempo de espera agotado (2s)')), 2000);
+  });
+
+  // 4. Promise.race - el primero en terminar gana
+  Promise.race([apiPromise, timeoutPromise])
+    // 5. Caso 1: Ganó la API (resuelve primero)
+    .then(result => {
+      const container = document.getElementById('race-result');
+      if (!container) return;
+      
+      // Mostrar mensaje de victoria de la API
+      container.innerHTML = `
+        <div class="flex items-start gap-4">
+          <span class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </span>
+          <div>
+            <p class="font-extrabold text-slate-900">🏆 Ganó la API</p>
+            <p class="text-sm text-slate-600 mt-1">${sanitizeHTML(result.title)}</p>
+            <p class="text-xs text-slate-400 mt-1.5">✅ La respuesta llegó antes que el temporizador de 2 segundos.</p>
+          </div>
+        </div>
+      `;
+    })
+    // 6. Caso 2: Ganó el temporizador (rechaza primero)
+    .catch(error => {
+      const container = document.getElementById('race-result');
+      if (!container) return;
+      
+      // Verificar si el error es por timeout
+      const isTimeout = error.message.includes('Tiempo de espera');
+      
+      if (isTimeout) {
+        // Mostrar mensaje de victoria del temporizador
+        container.innerHTML = `
+          <div class="flex items-start gap-4">
+            <span class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </span>
+            <div>
+              <p class="font-extrabold text-slate-900">⏰ Ganó el temporizador</p>
+              <p class="text-sm text-slate-600 mt-1">La API tardó más de 2 segundos en responder.</p>
+            </div>
+          </div>
+        `;
+      } else {
+        // Otro tipo de error (mostrar error genérico)
+        showError('race-result', error.message);
+      }
+    })
+    // 7. Siempre se ejecuta
+    .finally(() => console.log('[Paso 5] Promise.race completada.'));
+}
+
 
 // REPORTES
 
