@@ -426,6 +426,79 @@ function loadCombinedData() {
     // 6.Siempre se ejecuta
     .finally(() => console.log('[Paso 3] Promise.all completada.'));
 }
+
+// 7. PASO 04 — PROMISE.ALLSETTLED: resultados individuales
+
+function loadSettledPosts() {
+  // 1. Mostrar indicador de carga
+  showLoading('settled-posts');
+
+  // 2. Definir IDs de los posts a cargar
+  const postIds = [1, 2, 3, 4, 5];
+  
+  // 3. Crear un array de promesas (una por cada ID)
+  const promises = postIds.map(id => fetch(`${API}/posts/${id}`));
+
+  // 4. Promise.allSettled - espera TODAS las promesas (éxito o error)
+  Promise.allSettled(promises)
+    // 5. Procesar cada resultado individualmente
+    .then(async results => {
+      const container = document.getElementById('settled-posts');
+      if (!container) return;
+
+      // 6. Array para almacenar los posts procesados
+      const posts = [];
+      
+      // 7. Iterar sobre cada resultado
+      for (const result of results) {
+        // 8. Verificar si la promesa se cumplió
+        if (result.status === 'fulfilled') {
+          try {
+            // Convertir respuesta a JSON
+            const data = await result.value.json();
+            posts.push({ status: 'fulfilled', data });
+          } catch (e) {
+            // ❌ Error al convertir a JSON
+            posts.push({ status: 'rejected', reason: e.message });
+          }
+        } else {
+          // ❌ La promesa fue rechazada
+          posts.push({ status: 'rejected', reason: result.reason });
+        }
+      }
+
+      // 9. Renderizar cada post (éxito o error)
+      container.innerHTML = posts.map((post, index) => {
+        // ✅ Post exitoso
+        if (post.status === 'fulfilled') {
+          return `
+            <article class="card card-hover p-5 animate-fade-in">
+              <div class="flex items-center justify-between gap-3 mb-2.5">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Post #${post.data.id}</span>
+                <span class="chip-success">✅ Éxito</span>
+              </div>
+              <h4 class="font-bold text-slate-900 text-sm leading-snug">${sanitizeHTML(post.data.title)}</h4>
+              <p class="text-xs text-slate-500 mt-1.5">👤 Autor: usuario ${post.data.userId}</p>
+            </article>
+          `;
+        }
+        // ❌ Post fallido
+        return `
+          <article class="card card-hover p-5 animate-fade-in !border-red-200">
+            <div class="flex items-center justify-between gap-3 mb-2.5">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Petición #${index + 1}</span>
+              <span class="chip-danger">❌ Fallo</span>
+            </div>
+            <p class="text-sm text-red-600 font-medium">${sanitizeHTML(String(post.reason))}</p>
+          </article>
+        `;
+      }).join(''); // 3Unir todas las tarjetas
+    })
+    // 10. Siempre se ejecuta (allSettled NUNCA rechaza)
+    .finally(() => console.log('[Paso 4] Promise.allSettled completada.'));
+}
+
+
 // REPORTES
 
 let currentReportData = null;
