@@ -1,0 +1,22 @@
+<!--
+  favicon.svg — Icono oficial de la aplicacion
+  ---------------------------------------------------------------
+  Un rectangulo redondeado con degradado indigo -> violeta y un
+  rayo (bolt) blanco que simboliza asincronia / velocidad.
+  Los navegadores modernos (Chrome, Edge, Firefox, Safari 12+)
+  lo usan directamente por ser vectorial: se ve nitido en
+  cualquier densidad de pixeles sin necesidad de exportar PNG.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- Rayo centrado: path de 24x24 escalado x1.6 y trasladado -->
+  <path transform="translate(15.2 11.2) scale(1.4)"
+        d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
+        fill="#FFFFFF"/>
+</svg>

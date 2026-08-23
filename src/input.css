@@ -1,3 +1,189 @@
+/* ============================================================================
+   HOJA DE ENTRADA DE TAILWIND (input.css)
+   ----------------------------------------------------------------------------
+   Este archivo es la "fuente" del CSS. Tailwind lo procesa y genera
+   src/styles.css con únicamente las clases usadas en el proyecto.
+
+   Estructura:
+     1. Directivas de Tailwind (base, componentes, utilidades)
+     2. Capa BASE    → estilos globales del navegador (scrollbar, selección)
+     3. Capa COMPONENENTES → piezas reutilizables (.card, .btn-primary...)
+   ============================================================================ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================================
+   1. CAPA BASE — ajustes globales
+   ============================================================================ */
+@layer base {
+  html {
+    scroll-behavior: smooth;              /* Desplazamiento suave al navegar */
+    -webkit-text-size-adjust: 100%;       /* Evita el zoom raro en iOS */
+  }
+
+  body {
+    text-rendering: optimizeLegibility;   /* Mejor espaciado de glifos */
+    -webkit-font-smoothing: antialiased;  /* Texto más fino en macOS/Windows */
+  }
+
+  /* El texto seleccionado usa el color de marca. Detalle que suma. */
+  ::selection {
+    background-color: theme('colors.primary.600');
+    color: #fff;
+  }
+
+  /* Scrollbar personalizada (WebKit: Chrome/Edge/Safari) */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: theme('colors.slate.300');
+    border-radius: theme('borderRadius.full');
+    border: 2px solid transparent;
+    background-clip: content-box;         /* Deja aire alrededor del pulgar */
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: theme('colors.slate.400');
+  }
+
+  /* Firefox: versión equivalente con propiedades estándar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.slate.300') transparent;
+  }
+
+  /* Al navegar con Tab el foco se ve claramente (accesibilidad) */
+  :focus-visible {
+    outline: 2px solid theme('colors.primary.500');
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================================================
+   2. CAPA COMPONENTES — piezas reutilizables del sistema de diseño
+   ----------------------------------------------------------------------------
+   Cada clase agrupa utilidades para NO repetir 8 clases una y otra vez.
+   Si mañana cambia la marca, edito AQUÍ y todo el sitio se actualiza.
+   ============================================================================ */
+@layer components {
+
+  /* --- Tarjeta base ------------------------------------------------------ */
+  .card {
+    @apply bg-white rounded-2xl border border-slate-200 shadow-card;
+  }
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover hover:border-primary-200;
+  }
+
+  /* --- Botones ------------------------------------------------------------ */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
+           transition-all duration-200 select-none cursor-pointer
+           focus:outline-none focus-visible:ring-4 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-primary-600 text-white shadow-sm
+           hover:bg-primary-500 hover:shadow-md active:bg-primary-700
+           focus-visible:ring-primary-600/30;
+  }
+  .btn-secondary {
+    @apply btn bg-white text-slate-700 border border-slate-200 shadow-sm
+           hover:border-primary-300 hover:text-primary-700 hover:bg-primary-50
+           focus-visible:ring-primary-600/20;
+  }
+  .btn-danger {
+    @apply btn bg-red-50 text-red-700 border border-red-200
+           hover:bg-red-100 active:bg-red-200 focus-visible:ring-red-500/25;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800;
+  }
+
+  /* --- Chips / badges ----------------------------------------------------- */
+  .chip {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+  .chip-brand {
+    @apply chip bg-primary-50 text-primary-700 ring-1 ring-inset ring-primary-200;
+  }
+  .chip-success {
+    @apply chip bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200;
+  }
+  .chip-danger {
+    @apply chip bg-red-50 text-red-700 ring-1 ring-inset ring-red-200;
+  }
+  .chip-warning {
+    @apply chip bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200;
+  }
+
+  /* --- Código en línea ---------------------------------------------------- */
+  .code-tag {
+    @apply inline-block px-1.5 py-0.5 rounded-md bg-slate-100 border border-slate-200
+           font-mono text-[0.82em] text-primary-700;
+  }
+
+  /* --- Formularios -------------------------------------------------------- */
+  .input {
+    @apply w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800
+           placeholder:text-slate-400 shadow-sm transition-colors duration-200
+           focus:outline-none focus:border-primary-400 focus:ring-4 focus:ring-primary-600/15;
+  }
+  /* Select con flecha personalizada. La imagen va como CSS plano porque los
+     valores arbitrarios de Tailwind no admiten espacios dentro de url(). */
+  .select {
+    @apply input appearance-none pr-9 cursor-pointer;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px;
+  }
+
+  /* --- Navegación lateral -------------------------------------------------- */
+  .nav-item {
+    @apply relative flex items-center gap-3 px-3 py-2.5 mx-2 rounded-xl text-sm font-medium
+           text-slate-600 transition-colors duration-200
+           hover:bg-primary-50 hover:text-primary-700;
+  }
+  .nav-item-active {
+    @apply bg-primary-50 text-primary-700;
+  }
+  /* Barra indicadora a la izquierda del enlace activo */
+  .nav-item-active::before {
+    content: '';
+    @apply absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-full bg-primary-600;
+  }
+
+  /* --- Encabezado de sección ---------------------------------------------- */
+  .section-badge {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
+           bg-primary-50 text-primary-700 ring-1 ring-inset ring-primary-200;
+  }
+}
+
+/* ============================================================================
+   3. EXTRAS — impresión y accesibilidad
+   ============================================================================ */
+
+/* Al imprimir reportes solo sale el contenido, sin menú ni encabezado */
+@media print {
+  #sidebar,
+  #sidebar-overlay,
+  header,
+  footer,
+  #mobile-menu-btn {
+    display: none !important;
+  }
+  main {
+    margin-left: 0 !important;
+  }
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+}

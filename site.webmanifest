@@ -1,0 +1,14 @@
+{
+  "name": "Promesas JS — Tutorial SPA",
+  "short_name": "Promesas JS",
+  "description": "Tutorial interactivo de Promesas JavaScript con Tailwind CSS. Proyecto de septimo trimestre - SENA.",
+  "start_url": "./index.html",
+  "display": "browser",
+  "background_color": "#F8FAFC",
+  "theme_color": "#4F46E5",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "favicon-32x32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

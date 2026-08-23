@@ -1,61 +1,135 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- PROMESAS JS — Tutorial SPA | Sistema de diseño "Indigo Académico" -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Promesas API Gratuita — SPA Tutorial</title>
+  <title>Promesas JS · Tutorial SPA — SENA</title>
+  <meta name="description" content="Tutorial interactivo de Promesas JavaScript con Tailwind CSS. Proyecto académico de séptimo trimestre — SENA.">
+  <meta name="author" content="Aprendiz SENA — 7° trimestre">
+  <meta name="theme-color" content="#4F46E5">
+
+  <!-- FAVICONS: vectorial + PNG de respaldo + icono iOS + manifest PWA -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+
+  <!-- TIPOGRAFÍA: Plus Jakarta Sans (geométrica, moderna, excelente legibilidad) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- CSS compilado por Tailwind (npm run build:css) -->
   <link rel="stylesheet" href="./src/styles.css">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex">
 
-  <aside id="sidebar" class="w-64 min-h-screen bg-slate-900 border-r border-slate-800 fixed top-0 left-0 z-40 flex flex-col transition-transform duration-300 -translate-x-full">
-    <div class="p-5 border-b border-slate-800">
-      <h1 class="text-lg font-bold text-emerald-400">🚀 Promesas</h1>
-      <p class="text-xs text-slate-500 mt-1">SPA Tutorial</p>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex">
+
+  <!-- Accesibilidad: enlace para saltar directo al contenido con Tab -->
+  <a href="#page-content"
+     class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:btn focus:bg-primary-600 focus:text-white">
+    Saltar al contenido
+  </a>
+
+  <!-- BARRA LATERAL (SIDEBAR) -->
+  <aside id="sidebar"
+         class="w-64 fixed inset-y-0 left-0 z-40 bg-white border-r border-slate-200
+                flex flex-col transition-transform duration-300 ease-out -translate-x-full">
+
+    <!-- Marca / logo -->
+    <div class="flex items-center gap-3 px-5 h-16 border-b border-slate-100 shrink-0">
+      <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-violet-600
+                   flex items-center justify-center text-white shadow-sm shrink-0">
+        <!-- Icono "código": </> -->
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+        </svg>
+      </span>
+      <div class="min-w-0">
+        <p class="font-extrabold text-slate-900 leading-tight tracking-tight">Promesas JS</p>
+        <p class="text-[11px] font-semibold text-primary-700 uppercase tracking-wider">Tutorial SPA</p>
+      </div>
     </div>
-    <nav class="flex-1 overflow-y-auto py-3 px-2 space-y-0.5" id="nav-menu">
-      <a href="#home" data-page="home" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-        <span>🏠</span> Inicio
-      </a>
-      <a href="#promise-basica" data-page="promise-basica" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-        <span>💊</span> Promise básica
-      </a>
-      <a href="#promise-array" data-page="promise-array" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-        <span>📋</span> Promise + array
-      </a>
-      <a href="#promise-all" data-page="promise-all" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-        <span>🔄</span> Promise.all
-      </a>
-      <a href="#promise-allsettled" data-page="promise-allsettled" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-        <span>✅</span> Promise.allSettled
-      </a>
-      <a href="#promise-race" data-page="promise-race" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-        <span>🏁</span> Promise.race
-      </a>
-      <a href="#promise-any" data-page="promise-any" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-        <span>🥇</span> Promise.any
-      </a>
-      <a href="#maquina-estados" data-page="maquina-estados" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-        <span>🎛️</span> Máquina de Estados
-      </a>
-      <div class="border-t border-slate-800 my-3"></div>
-      <a href="#videos" data-page="videos" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-        <span>🎬</span> Videos
-      </a>
-      <a href="#reportes" data-page="reportes" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-        <span>📊</span> Reportes
-      </a>
-      <a href="#geolocalizacion" data-page="geolocalizacion" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-        <span>📍</span> Geolocalización
-      </a>
+
+   <!-- Navegación principal agrupada por temas -->
+    <nav id="nav-menu" aria-label="Menú principal" class="flex-1 overflow-y-auto py-4 space-y-6">
+
+      <!-- Grupo: Fundamentos -->
+      <div>
+        <p class="px-6 mb-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-400">Fundamentos</p>
+        <a href="#home" data-page="home" class="nav-link nav-item">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Inicio
+        </a>
+        <a href="#promise-basica" data-page="promise-basica" class="nav-link nav-item">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Promise básica
+        </a>
+        <a href="#promise-array" data-page="promise-array" class="nav-link nav-item">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Promise + array
+        </a>
+      </div>
+
+      <!-- Grupo: Combinadores de promesas -->
+      <div>
+        <p class="px-6 mb-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-400">Combinadores</p>
+        <a href="#promise-all" data-page="promise-all" class="nav-link nav-item">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+          Promise.all
+        </a>
+        <a href="#promise-allsettled" data-page="promise-allsettled" class="nav-link nav-item">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          Promise.allSettled
+        </a>
+        <a href="#promise-race" data-page="promise-race" class="nav-link nav-item">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          Promise.race
+        </a>
+        <a href="#promise-any" data-page="promise-any" class="nav-link nav-item">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><polyline points="8.21 13.5 7 23 12 20 17 23 15.79 13.5"/></svg>
+          Promise.any
+        </a>
+        <a href="#maquina-estados" data-page="maquina-estados" class="nav-link nav-item">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+          Máquina de estados
+        </a>
+      </div>
+
+      <!-- Grupo: Módulos finales -->
+      <div>
+        <p class="px-6 mb-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-400">Módulos</p>
+        <a href="#videos" data-page="videos" class="nav-link nav-item">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          Videos
+        </a>
+        <a href="#reportes" data-page="reportes" class="nav-link nav-item">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Reportes
+        </a>
+        <a href="#geolocalizacion" data-page="geolocalizacion" class="nav-link nav-item">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Geolocalización
+        </a>
+        
+        <!-- En el sidebar -->
+        <a href="#contacto" data-page="contacto" class="nav-link nav-item">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Contacto
+        </a>
+        <a href="#dashboard" data-page="dashboard" class="nav-link nav-item">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Dashboard
+        </a>
+      </div>
     </nav>
-    <div class="p-3 border-t border-slate-800">
-      <button id="sidebar-toggle" class="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs text-slate-500 hover:text-white bg-slate-800 rounded-lg transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        Cerrar menú
-      </button>
-    </div>
-  </aside>
 
   <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden"></div>
 
