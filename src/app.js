@@ -83,80 +83,91 @@ const RANK_STYLES = [
   'bg-orange-100 text-orange-700'
 ];
 
-// ================================================================
-// UTILIDADES
-// ================================================================
+// 2. UTILIDADES
 
+// Escapa caracteres especiales para prevenir ataques XSS cuando el texto
+// proveniente de la API se inserta dentro del HTML.7
 function sanitizeHTML(raw) {
   if (typeof raw !== 'string') return '';
   const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;' };
   return raw.replace(/[&<>"']/g, match => map[match]);
 }
 
-function showLoading(containerId, message = 'Cargando...') {
+// Spinner + mensaje de carga reutilizables (se insertan en un contenedor). 
+function showLoading(containerId, message = 'Cargando datos…') {
   const container = document.getElementById(containerId);
   if (!container) return;
-  container.innerHTML = `<p class="text-slate-500">${sanitizeHTML(message)}</p>`;
+  container.innerHTML = `
+    <div class="flex items-center gap-3 py-2 text-sm text-slate-400">
+      <svg class="w-4 h-4 animate-spin shrink-0" viewBox="0 0 24 24" fill="none">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+      </svg>
+      ${sanitizeHTML(message)}
+    </div>
+  `;
 }
 
+// Caja de error con estilo de alerta suave (rojo sobre rojo muy claro). 
 function showError(containerId, message) {
   const container = document.getElementById(containerId);
   if (!container) return;
-  container.innerHTML = `<p class="text-red-400">Error: ${sanitizeHTML(message)}</p>`;
+  container.innerHTML = `
+    <div class="flex items-start gap-3 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+      <svg class="w-5 h-5 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span><strong class="font-bold">Error:</strong> ${sanitizeHTML(message)}</span>
+    </div>
+  `;
 }
 
+// Lee el nombre de la página desde el hash (#pagina). Por defecto: home. 
 function getPageFromHash() {
-  const hash = window.location.hash.replace('#', '') || 'home';
-  return hash;
+  return window.location.hash.replace('#', '') || 'home';
 }
 
+// Cambia el hash; el evento hashchange dispara el router. 
 function navigateTo(page) {
-  window.location.hash = page;
+  window.location.hash = page; // Cambia el hash y dispara hashchange
 }
 
+// Resalta el enlace activo del menú usando la clase .nav-item-active,
+// que dibuja la barrita índigo a la izquierda (definida en input.css).
 function updateNavActive() {
   const currentPage = getPageFromHash();
   document.querySelectorAll('.nav-link').forEach(link => {
-    const linkPage = link.getAttribute('data-page');
-    if (linkPage === currentPage) {
-      link.classList.add('bg-slate-800', 'text-emerald-400');
-      link.classList.remove('text-slate-400');
-    } else {
-      link.classList.remove('bg-slate-800', 'text-emerald-400');
-      link.classList.add('text-slate-400');
-    }
+    link.classList.toggle('nav-item-active', link.getAttribute('data-page') === currentPage);
   });
 }
 
+// Actualiza el título del header Y el título de la pestaña del navegador. 
 function updatePageTitle() {
-  const currentPage = getPageFromHash();
-  const title = PAGES[currentPage] || currentPage;
+  const title = PAGES[getPageFromHash()] || 'Inicio';
   const titleEl = document.getElementById('page-title');
-  if (titleEl) {
-    titleEl.textContent = title;
-  }
+  if (titleEl) titleEl.textContent = title; // Actualiza el título en el header
+  document.title = `${title} · Promesas JS`; // Actualiza la pestaña del navegador
 }
 
+// Muestra la sección pedida, oculta las demás y reinicia la animación
 function showPage(pageName) {
-  document.querySelectorAll('.page-section').forEach(section => {
-    section.classList.add('hidden');
-  });
+  document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
   const target = document.getElementById(`page-${pageName}`);
   if (target) {
     target.classList.remove('hidden');
+    target.classList.remove('animate-slide-up');
+    void target.offsetWidth;
+    target.classList.add('animate-slide-up');
   }
   updateNavActive();
   updatePageTitle();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ================================================================
-// RUTAS SPA
-// ================================================================
+// 3. RUTAS SPA
 
+// Router principal: se ejecuta al cargar la página y con cada hashchange. 
 function handleRoute() {
   const page = getPageFromHash();
-  if (!PAGES[page]) {
+  if (!PAGES[page]) {           // Página inexistente → volver al inicio
     navigateTo('home');
     return;
   }
@@ -164,22 +175,21 @@ function handleRoute() {
   loadPageData(page);
 }
 
+// Carga: solo se piden datos al visitar cada sección. 
 function loadPageData(page) {
   switch (page) {
-    case 'promise-basica': loadSinglePost(); break;
-    case 'promise-array': loadUsersList(); break;
-    case 'promise-all': loadCombinedData(); break;
-    case 'promise-allsettled': loadSettledPosts(); break;
-    case 'promise-race': loadRaceResult(); break;
-    case 'promise-any': loadAnyResult(); break;
-    case 'maquina-estados': initSearchIfNeeded(); break;
-    case 'videos': break;
-    case 'reportes': break;
-    case 'geolocalizacion': break;
+    case 'promise-basica':      loadSinglePost();     break;
+    case 'promise-array':       loadUsersList();      break;
+    case 'promise-all':         loadCombinedData();   break;
+    case 'promise-allsettled':  loadSettledPosts();   break;
+    case 'promise-race':        loadRaceResult();     break;
+    case 'promise-any':         loadAnyResult();      break;
+    case 'maquina-estados':     initSearchIfNeeded(); break;
+    case 'contacto':            loadContactData();    break;  // NUEVO CASO
+    case 'dashboard':           loadDashboardData();  break;
     default: break;
   }
 }
-
 
 // ================================================================
 // REPORTES

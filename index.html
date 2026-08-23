@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <!-- PROMESAS JS — Tutorial SPA | Sistema de diseño "Indigo Académico" -->
@@ -23,9 +23,9 @@
 
   <!-- CSS compilado por Tailwind (npm run build:css) -->
   <link rel="stylesheet" href="./src/styles.css">
-</head>
+  </head>
 
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex">
+  <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex">
 
   <!-- Accesibilidad: enlace para saltar directo al contenido con Tab -->
   <a href="#page-content"
@@ -116,7 +116,7 @@
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           Geolocalización
         </a>
-        
+
         <!-- En el sidebar -->
         <a href="#contacto" data-page="contacto" class="nav-link nav-item">
           <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -131,81 +131,223 @@
       </div>
     </nav>
 
-  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden"></div>
+    
+    <!-- Pie del menú: identificación del proyecto -->
+    <div class="p-4 border-t border-slate-100 shrink-0">
+      <div class="rounded-xl bg-primary-50 ring-1 ring-inset ring-primary-100 px-3 py-2.5">
+        <p class="text-xs font-bold text-primary-800">Séptimo trimestre</p>
+        <p class="text-[11px] text-primary-700/80 mt-0.5">Proyecto académico · SENA</p>
+      </div>
+      <button id="sidebar-toggle"
+              class="mt-2 w-full btn-ghost !justify-start text-xs px-3 py-2">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Cerrar menú
+      </button>
+    </div>
+  </aside>
 
+  <!-- Velo oscuro detrás del menú en móvil (al hacer clic se cierra) -->
+  <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30 hidden"></div>
+
+
+  <!-- El margen izquierdo cuando el menú está abierto -->
   <main id="main-content" class="flex-1 min-h-screen transition-all duration-300">
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-10">
-      <div class="flex items-center justify-between px-4 py-3">
-         <button id="mobile-menu-btn" class="p-2 text-slate-400 hover:text-white">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-        </button>
-        <h2 id="page-title" class="text-lg font-bold text-emerald-400">🏠 Inicio</h2>
-        <div class="w-10"></div>
+
+    <!-- ENCABEZADO -->
+    <header class="sticky top-0 z-20 bg-white/85 backdrop-blur border-b border-slate-200">
+      <div class="flex items-center justify-between gap-3 px-4 sm:px-6 h-16">
+        <div class="flex items-center gap-3 min-w-0">
+          <button id="mobile-menu-btn" aria-label="Abrir o cerrar el menú"
+                  class="p-2 -ml-2 rounded-lg text-slate-500 hover:text-primary-700 hover:bg-primary-50 transition-colors">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <h2 id="page-title" class="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">Inicio</h2>
+        </div>
+        <span class="chip-brand hidden sm:inline-flex">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg>
+          Aprendiz SENA · 7° trim.
+        </span>
       </div>
     </header>
 
-    <div id="page-content" class="max-w-5xl mx-auto px-4 py-8 space-y-8">
+    <div id="page-content" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
 
-      <!-- HOME -->
+      
+      <!-- PÁGINA: INICIO Héro con degradado de marca + estadísticas + tarjetas de características -->
       <section id="page-home" class="page-section">
-        <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 mb-6">
-          <h2 class="text-2xl font-bold text-emerald-400 mb-2">Bienvenido al Tutorial de Promesas</h2>
-          <p class="text-slate-400">Este es un SPA educativo que demuestra los 7 patrones fundamentales de Promesas en JavaScript, más secciones de videos, reportes y geolocalización.</p>
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-700 via-primary-600 to-violet-600 p-8 sm:p-12 shadow-card-hover">
+          <!-- Círculos decorativos difuminados (profundidad sin imágenes) -->
+          <div class="absolute -top-24 -right-16 w-72 h-72 rounded-full bg-white/10 blur-3xl pointer-events-none"></div>
+          <div class="absolute -bottom-28 -left-10 w-80 h-80 rounded-full bg-violet-400/20 blur-3xl pointer-events-none"></div>
+
+          <div class="relative max-w-2xl">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold text-white bg-white/15 ring-1 ring-inset ring-white/25">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Tutorial interactivo
+            </span>
+            <h2 class="mt-4 text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+              Domina las Promesas de JavaScript
+            </h2>
+            <p class="mt-3 text-primary-50/90 text-base leading-relaxed">
+              Una aplicación de una sola página que demuestra los 7 patrones fundamentales de la
+              programación asíncrona consumiendo una API real, más módulos de video, reportes,
+              geolocalización y un dashboard en vivo.
+            </p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <a href="#promise-basica" data-page="promise-basica"
+                 class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-primary-700 text-sm font-bold shadow-md hover:bg-primary-50 hover:-translate-y-0.5 transition-all">
+                Empezar el tutorial
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+              <a href="#dashboard" data-page="dashboard"
+                 class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-bold ring-1 ring-inset ring-white/40 hover:bg-white/10 transition-colors">
+                Ver el dashboard
+              </a>
+            </div>
+
+            <!-- Estadísticas rápidas -->
+            <dl class="mt-8 grid grid-cols-3 gap-4 max-w-md">
+              <div>
+                <dt class="text-[11px] font-semibold uppercase tracking-wider text-primary-100/80">Patrones</dt>
+                <dd class="text-2xl font-extrabold text-white tabular-nums">7</dd>
+              </div>
+              <div>
+                <dt class="text-[11px] font-semibold uppercase tracking-wider text-primary-100/80">Módulos extra</dt>
+                <dd class="text-2xl font-extrabold text-white tabular-nums">5</dd>
+              </div>
+              <div>
+                <dt class="text-[11px] font-semibold uppercase tracking-wider text-primary-100/80">Frameworks</dt>
+                <dd class="text-2xl font-extrabold text-white tabular-nums">0</dd>
+              </div>
+            </dl>
+          </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="bg-slate-900 rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-            <h3 class="font-bold text-white mb-2">💊 Promise básica</h3>
-            <p class="text-sm text-slate-400">fetch() + .then() + .catch() + .finally()</p>
+
+        <!-- Tarjetas de características (grid responsivo) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">
+          <div class="card card-hover p-5 flex gap-4">
+            <span class="w-11 h-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900">Promise básica</h3>
+              <p class="text-sm text-slate-500 mt-1 leading-relaxed"><code class="code-tag">fetch()</code> con <code class="code-tag">.then()</code>, <code class="code-tag">.catch()</code> y <code class="code-tag">.finally()</code>.</p>
+            </div>
           </div>
-          <div class="bg-slate-900 rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-            <h3 class="font-bold text-white mb-2">📋 Promise + array</h3>
-            <p class="text-sm text-slate-400">Renderizar lista con .map()</p>
+          <div class="card card-hover p-5 flex gap-4">
+            <span class="w-11 h-11 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900">Promise + array</h3>
+              <p class="text-sm text-slate-500 mt-1 leading-relaxed">Renderizar una lista completa con <code class="code-tag">.map()</code>.</p>
+            </div>
           </div>
-          <div class="bg-slate-900 rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-            <h3 class="font-bold text-white mb-2">🔄 Promise.all</h3>
-            <p class="text-sm text-slate-400">Peticiones en paralelo — todo o nada</p>
+          <div class="card card-hover p-5 flex gap-4">
+            <span class="w-11 h-11 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900">Promise.all</h3>
+              <p class="text-sm text-slate-500 mt-1 leading-relaxed">Peticiones en paralelo: es atómico, «todo o nada».</p>
+            </div>
           </div>
-          <div class="bg-slate-900 rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-            <h3 class="font-bold text-white mb-2">✅ Promise.allSettled</h3>
-            <p class="text-sm text-slate-400">Aísla fallos — nunca rechaza</p>
+          <div class="card card-hover p-5 flex gap-4">
+            <span class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900">Promise.allSettled</h3>
+              <p class="text-sm text-slate-500 mt-1 leading-relaxed">Aísla los fallos: nunca rechaza en conjunto.</p>
+            </div>
           </div>
-          <div class="bg-slate-900 rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-            <h3 class="font-bold text-white mb-2">🏁 Promise.race</h3>
-            <p class="text-sm text-slate-400">El primero en terminar gana</p>
+          <div class="card card-hover p-5 flex gap-4">
+            <span class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900">Promise.race</h3>
+              <p class="text-sm text-slate-500 mt-1 leading-relaxed">El primero en terminar gana: ideal para timeouts.</p>
+            </div>
           </div>
-          <div class="bg-slate-900 rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-            <h3 class="font-bold text-white mb-2">🥇 Promise.any</h3>
-            <p class="text-sm text-slate-400">El primer éxito importa</p>
+          <div class="card card-hover p-5 flex gap-4">
+            <span class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><polyline points="8.21 13.5 7 23 12 20 17 23 15.79 13.5"/></svg>
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900">Promise.any</h3>
+              <p class="text-sm text-slate-500 mt-1 leading-relaxed">Solo importa el primer éxito de todos.</p>
+            </div>
           </div>
-          <div class="bg-slate-900 rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-            <h3 class="font-bold text-white mb-2">🎛️ Máquina de Estados</h3>
-            <p class="text-sm text-slate-400">UI reactiva PENDING / FULFILLED / REJECTED</p>
+          <div class="card card-hover p-5 flex gap-4">
+            <span class="w-11 h-11 rounded-xl bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900">Máquina de estados</h3>
+              <p class="text-sm text-slate-500 mt-1 leading-relaxed">UI reactiva: PENDING, FULFILLED y REJECTED.</p>
+            </div>
           </div>
-          <div class="bg-slate-900 rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-            <h3 class="font-bold text-white mb-2">🎬 Videos</h3>
-            <p class="text-sm text-slate-400">Consumo de cámara y video</p>
+          <div class="card card-hover p-5 flex gap-4">
+            <span class="w-11 h-11 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900">Videos</h3>
+              <p class="text-sm text-slate-500 mt-1 leading-relaxed">Cámara del dispositivo con <code class="code-tag">getUserMedia()</code>.</p>
+            </div>
           </div>
-          <div class="bg-slate-900 rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-            <h3 class="font-bold text-white mb-2">📊 Reportes</h3>
-            <p class="text-sm text-slate-400">Generar reportes desde datos de API</p>
+          <div class="card card-hover p-5 flex gap-4">
+            <span class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900">Reportes</h3>
+              <p class="text-sm text-slate-500 mt-1 leading-relaxed">Genera, descarga e imprime reportes de la API.</p>
+            </div>
           </div>
-          <div class="bg-slate-900 rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all">
-            <h3 class="font-bold text-white mb-2">📍 Geolocalización</h3>
-            <p class="text-sm text-slate-400">Ubicación del usuario en mapa</p>
+          <div class="card card-hover p-5 flex gap-4">
+            <span class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900">Geolocalización</h3>
+              <p class="text-sm text-slate-500 mt-1 leading-relaxed">Tu ubicación dibujada en un mapa de OpenStreetMap.</p>
+            </div>
+          </div>
+          <div class="card card-hover p-5 flex gap-4">
+            <span class="w-11 h-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900">Contacto</h3>
+              <p class="text-sm text-slate-500 mt-1 leading-relaxed">Información de contacto y horarios de atención.</p>
+            </div>
+          </div>
+          <div class="card card-hover p-5 flex gap-4">
+            <span class="w-11 h-11 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900">Dashboard</h3>
+              <p class="text-sm text-slate-500 mt-1 leading-relaxed">Métricas globales que se actualizan cada 30 segundos.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- PROMISE BASICA -->
+      <!-- PASO 1 — PROMISE BÁSICA -->
       <section id="page-promise-basica" class="page-section hidden">
-        <div class="flex items-center gap-3 mb-4">
-          <span class="bg-emerald-500/10 text-emerald-400 text-xs font-bold px-2 py-1 rounded">Paso 1</span>
-          <h2 class="text-xl font-bold">Promise básica: Obtener 1 post</h2>
-        </div>
-        <p class="text-slate-400 text-sm mb-4">Usamos <code class="bg-slate-800 px-1.5 py-0.5 rounded text-emerald-300">fetch()</code> que devuelve una Promise. Encadenamos <code class="bg-slate-800 px-1.5 py-0.5 rounded text-emerald-300">.then()</code> para procesar la respuesta.</p>
-        <div id="single-post" class="bg-slate-900 rounded-xl p-6 border border-slate-800">
-          <p class="text-slate-500">Cargando post...</p>
-        </div>
+        <header class="mb-6">
+          <span class="section-badge">Paso 01</span>
+          <h2 class="mt-3 text-2xl font-extrabold text-slate-900 tracking-tight">Promise básica: obtener un post</h2>
+          <p class="mt-2 text-slate-500 max-w-2xl leading-relaxed">
+            Usamos <code class="code-tag">fetch()</code>, que devuelve una Promise. Encadenamos
+            <code class="code-tag">.then()</code> para procesar la respuesta y
+            <code class="code-tag">.catch()</code> para los errores.
+          </p>
+        </header>
+        <div id="single-post" class="card card-hover p-6"></div>
       </section>
 
       <!-- PROMISE ARRAY -->

@@ -11,5 +11,12 @@
         ]
       }
     ]
-  }
+  },
+  "browserslist": [
+    "defaults",
+    "not ie 11",
+    "not and_ff <= 151",
+    "not firefox <= 152",
+    "not opera <= 131"
+  ]
 }
