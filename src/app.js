@@ -282,6 +282,53 @@ function loadSinglePost() {
     .finally(() => console.log('[Paso 1 Modificado] 3 posts cargados con allSettled.'));
 }
 
+// 5. PASO 02 — PROMISE + ARRAY: renderizar tarjetas con avatar
+
+// Extrae las iniciales de un nombre completo ("Ana Gomez" → "AG").
+function getInitials(fullName) {
+  return fullName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(word => word[0].toUpperCase())
+    .join('');
+}
+
+function loadUsersList() {
+  showLoading('users-list', 'Cargando lista de usuarios…');
+  fetch(`${API}/users?_limit=6`)
+    .then(r => r.json())
+    .then(users => {
+      const container = document.getElementById('users-list');
+      if (!container) return;
+      container.innerHTML = users.map((user, i) => `
+        <article class="card card-hover p-5 animate-fade-in">
+          <div class="flex items-center gap-3">
+            <span class="w-11 h-11 rounded-full ${AVATAR_TONES[i % AVATAR_TONES.length]} flex items-center justify-center font-extrabold text-sm shrink-0">
+              ${getInitials(user.name)}
+            </span>
+            <div class="min-w-0">
+              <h4 class="font-bold text-slate-900 truncate">${sanitizeHTML(user.name)}</h4>
+              <p class="text-xs font-semibold text-primary-600">@${sanitizeHTML(user.username)}</p>
+            </div>
+          </div>
+          <dl class="mt-4 space-y-1.5 text-xs">
+            <div class="flex justify-between gap-3">
+              <dt class="text-slate-400 font-medium">Correo</dt>
+              <dd class="text-slate-600 truncate">${sanitizeHTML(user.email)}</dd>
+            </div>
+            <div class="flex justify-between gap-3">
+              <dt class="text-slate-400 font-medium">Empresa</dt>
+              <dd class="text-slate-600 truncate">${sanitizeHTML(user.company.name)}</dd>
+            </div>
+          </dl>
+        </article>
+      `).join('');
+    })
+    .catch(err => showError('users-list', err.message))
+    .finally(() => console.log('[Paso 2] Promesa con array completada.'));
+}
+
 // REPORTES
 
 let currentReportData = null;
