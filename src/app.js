@@ -1172,84 +1172,112 @@ function initReports() {
   printBtn.addEventListener('click', () => window.print());
 }
 
-// ================================================================
-// GEOLOCALIZACION
-// ================================================================
+// 15. GEOLOCALIZACIÓN — coordenadas + mapa embebido
 
+// CÓDIGO DE GEOLOCALIZACIÓN - initGeolocation()
 function initGeolocation() {
   const getLocationBtn = document.getElementById('get-location');
   const geoInfo = document.getElementById('geo-info');
   const geoError = document.getElementById('geo-error');
   const mapFrame = document.getElementById('map-frame');
-
   if (!getLocationBtn) return;
 
-  getLocationBtn.addEventListener('click', async () => {
+  function showGeoError(message) {
+    geoError.classList.remove('hidden');
+    geoError.textContent = message;
+  }
+
+  // 1. ¿Qué método se usa para obtener la ubicación?
+  getLocationBtn.addEventListener('click', async () => {   // R: navigator.geolocation.getCurrentPosition()
     geoError.classList.add('hidden');
-    geoInfo.innerHTML = `<p class="text-yellow-400">Obteniendo ubicación...</p>`;
+    geoInfo.innerHTML = `
+      <div class="flex items-center gap-3 text-sm text-slate-400">
+        <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+        Obteniendo ubicación…
+      </div>
+    `;
 
     if (!navigator.geolocation) {
-      geoError.classList.remove('hidden');
-      geoError.textContent = '❌ Tu navegador no soporta geolocalización.';
+      showGeoError('Tu navegador no soporta geolocalización.');
       return;
     }
 
+    // Verificar permisos antes de solicitar ubicación
     if (navigator.permissions && navigator.permissions.query) {
       try {
         const permission = await navigator.permissions.query({ name: 'geolocation' });
         if (permission.state === 'denied') {
-          geoError.classList.remove('hidden');
-          geoError.textContent = '❌ Permiso de ubicación denegado. Haz clic en el ícono de candado 🔒 en la barra de direcciones, selecciona "Sitio no seguro" o "Información del sitio", luego activa "Ubicación" y recarga la página.';
+          showGeoError('Permiso denegado. Habilítalo en la configuración del navegador.');
           return;
         }
-      } catch (e) {
-        // Si el navegador no soporta permissions.query, continuamos de todos modos
-      }
+      } catch (e) { /* El navegador no expone Permissions API: seguimos igual */ }
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      // ✅ Función de éxito
+      position => {
         const { latitude, longitude, accuracy } = position.coords;
-        const { timestamp } = position;
-
         geoInfo.innerHTML = `
-          <div class="space-y-1">
-            <p><strong>Latitud:</strong> <span class="text-emerald-400">${latitude.toFixed(6)}</span></p>
-            <p><strong>Longitud:</strong> <span class="text-emerald-400">${longitude.toFixed(6)}</span></p>
-            <p><strong>Precisión:</strong> ±${accuracy.toFixed(1)} metros</p>
-            <p><strong>Timestamp:</strong> ${new Date(timestamp).toLocaleString()}</p>
+          <div class="flex justify-between gap-4 py-1">
+            <dt class="text-slate-400 font-medium">🌐 Latitud</dt>
+            <dd class="font-semibold text-slate-800 tabular-nums">${latitude.toFixed(6)}</dd>
+          </div>
+          <div class="flex justify-between gap-4 py-1">
+            <dt class="text-slate-400 font-medium">🌐 Longitud</dt>
+            <dd class="font-semibold text-slate-800 tabular-nums">${longitude.toFixed(6)}</dd>
+          </div>
+          <div class="flex justify-between gap-4 py-1">
+            <dt class="text-slate-400 font-medium">🎯 Precisión</dt>
+            <dd class="font-semibold text-slate-800 tabular-nums">±${accuracy.toFixed(1)} m</dd>
           </div>
         `;
-
-        const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${longitude - 0.01},${latitude - 0.01},${longitude + 0.01},${latitude + 0.01}&layer=mapnik&marker=${latitude},${longitude}`;
-        mapFrame.src = mapUrl;
+        
+        // 2. Escribe la URL correcta de la API de geolocalización
+        // R: URL de OpenStreetMap con las coordenadas embebidas
+        mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${longitude - 0.01},${latitude - 0.01},${longitude + 0.01},${latitude + 0.01}&layer=mapnik&marker=${latitude},${longitude}`;
       },
-      (error) => {
-        geoInfo.innerHTML = '';
-        geoError.classList.remove('hidden');
-
+      //  bbox: bounding box (cuadro delimitador) con margen de 0.01°
+      //  marker: punto rojo en la ubicación exacta
+      
+      // ❌ Función de error
+      error => {
+        geoInfo.innerHTML = '<p class="text-slate-400 text-sm">No se ha obtenido ninguna ubicación.</p>';
+        
+        // 4. Explica cómo se manejan los códigos de error
+        // R: Se evalúa error.code y se muestra un mensaje específico para cada caso
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            geoError.textContent = '❌ Permiso de ubicación denegado. Haz clic en el ícono de candado 🔒 en la barra de direcciones, selecciona "Sitio no seguro" o "Información del sitio", luego activa "Ubicación" y recarga la página.';
+            // Usuario denegó el permiso de geolocalización
+            showGeoError('🚫 Permiso denegado. Habilítalo en la configuración del navegador.');
             break;
           case error.POSITION_UNAVAILABLE:
-            geoError.textContent = '❌ Ubicación no disponible. Verifica que tu dispositivo tenga GPS o conexión a red.';
+            // No se pudo obtener la ubicación (GPS sin señal, etc.)
+            showGeoError('📡 Ubicación no disponible. Verifica el GPS o tu conexión.');
             break;
           case error.TIMEOUT:
-            geoError.textContent = '❌ La solicitud de ubicación expiró. Inténtalo de nuevo.';
+            // La solicitud excedió el tiempo máximo de espera
+            showGeoError('⏰ Tiempo agotado al buscar la señal. Intenta de nuevo.');
             break;
           default:
-            geoError.textContent = `❌ Error desconocido: ${error.message}`;
+            // ❌ Error desconocido
+            showGeoError(`❌ Error inesperado: ${error.message}`);
         }
       },
+      
+      // 3. ¿Qué opciones de configuración se pasan al método de geolocalización?
+      // R: Se pasan las siguientes opciones en un objeto:
       {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000
+        enableHighAccuracy: true,   // Usar GPS para mayor precisión (consume más batería)
+        timeout: 10000,             // Tiempo máximo de espera (10 segundos)
+        maximumAge: 60000           // Aceptar ubicación en caché (1 minuto)
       }
     );
   });
 }
+
 
 // ================================================================
 // SIDEBAR Y NAVEGACION
