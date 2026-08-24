@@ -58,12 +58,18 @@ function getPageFromHash() {
 // elimina el símbolo '#' y devuelve el nombre de la página.
 // Si no hay hash, devuelve 'home' por defecto.
 
-// Estados posibles de la máquina de estados de la UI
+//  MÁQUINA DE ESTADOS
+// 1. ¿Por qué se usa Object.freeze()?
+
+// R: Object.freeze() evita que el objeto sea modificado.
 const UI_STATE = Object.freeze({
-  IDLE: 'IDLE',             // Inactivo (antes de la primera búsqueda)
-  PENDING: 'PENDING',       // Cargando: la promesa aún no termina
-  FULFILLED: 'FULFILLED',   // Éxito: la promesa se cumplió
-  REJECTED: 'REJECTED'      // Error: la promesa fue rechazada
+//    Esto es importante porque UI_STATE debe ser constante e inmutable.
+//    Si alguien intenta cambiar un valor, el navegador lanzará un error en modo estricto.
+//    Ejemplo: UI_STATE.PENDING = 'CARGANDO' → ❌ Error en modo estricto
+  IDLE: 'IDLE',           // 🔵 Inactivo - antes de la primera búsqueda
+  PENDING: 'PENDING',     // 🟡 Cargando - la promesa aún no termina
+  FULFILLED: 'FULFILLED', // 🟢 Éxito - la promesa se cumplió
+  REJECTED: 'REJECTED'    // 🔴 Error - la promesa fue rechazada
 });
 
 /* Paleta de avatares: se asigna por índice para que la lista de usuarios
