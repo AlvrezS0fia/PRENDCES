@@ -639,6 +639,126 @@ function loadAnyResult() {
     .finally(() => console.log('[Paso 6] Promise.any completada.'));
 }
 
+// 10. PASO 07 — MÁQUINA DE ESTADOS: UI reactiva
+
+// Variable de control para evitar inicialización múltiple
+let searchInitialized = false;
+
+function initSearchIfNeeded() {
+  // 1. Evitar inicialización duplicada
+  if (searchInitialized) return;
+  searchInitialized = true;
+
+  // 2. Obtener referencias a elementos del DOM
+  const input = document.getElementById('user-id-input');
+  const btn = document.getElementById('search-btn');
+  const statusEl = document.getElementById('search-status');
+  const resultsEl = document.getElementById('search-results');
+  const btnText = document.getElementById('btn-text');
+  const btnSpinner = document.getElementById('btn-spinner');
+
+  // 3. Clases CSS para cada estado (banners de colores)
+  const STATUS_CLASSES = {
+    PENDING:   'mb-4 px-4 py-3 rounded-xl text-sm font-medium bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200',
+    FULFILLED: 'mb-4 px-4 py-3 rounded-xl text-sm font-medium bg-emerald-50 text-emerald-800 ring-1 ring-inset ring-emerald-200',
+    REJECTED:  'mb-4 px-4 py-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 ring-1 ring-inset ring-red-200'
+  };
+
+  // 4. Único punto donde cambia la UI según el estado
+  function setState(state, message = '') {
+    // Mostrar el banner de estado
+    statusEl.classList.remove('hidden');
+    statusEl.className = STATUS_CLASSES[state];
+
+    switch (state) {
+      case UI_STATE.PENDING:
+        // Estado de carga
+        statusEl.textContent = message || 'Consultando al servidor…';
+        btnText.textContent = 'Buscando…';
+        btnSpinner.classList.remove('hidden'); // Mostrar spinner
+        btn.disabled = true; // Deshabilitar botón
+        break;
+        
+      case UI_STATE.FULFILLED:
+        // Estado de éxito
+        statusEl.textContent = message || '✅ Datos cargados correctamente.';
+        btnText.textContent = 'Buscar';
+        btnSpinner.classList.add('hidden'); // Ocultar spinner
+        btn.disabled = false; // Habilitar botón
+        break;
+        
+      case UI_STATE.REJECTED:
+        // Estado de error
+        statusEl.textContent = message || '❌ No fue posible cargar los datos.';
+        btnText.textContent = 'Buscar';
+        btnSpinner.classList.add('hidden'); // Ocultar spinner
+        btn.disabled = false; // Habilitar botón
+        break;
+    }
+  }
+
+  // 5. Función principal de búsqueda
+  function searchPostsByUser(userId) {
+    // Cambiar a estado PENDING
+    setState(UI_STATE.PENDING, `🔄 Buscando posts del usuario #${userId}…`);
+    
+    // Hacer la petición a la API
+    fetch(`${API}/posts?userId=${userId}`)
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json(); // Convertir a JSON
+      })
+      .then(posts => {
+        // ✅ Éxito - verificar si hay resultados
+        if (posts.length === 0) {
+          // 📭 Sin posts
+          setState(UI_STATE.FULFILLED, `ℹ️ El usuario #${userId} existe, pero no tiene posts publicados.`);
+          resultsEl.innerHTML = `<p class="text-sm text-slate-400">📭 Sin resultados para mostrar.</p>`;
+          return;
+        }
+        
+        // Mostrar posts encontrados
+        setState(UI_STATE.FULFILLED, `✅ ${posts.length} posts encontrados.`);
+        resultsEl.innerHTML = posts.map(post => `
+          <article class="rounded-xl bg-white ring-1 ring-slate-200 p-4 hover:ring-primary-300 hover:bg-primary-50/40 transition-colors">
+            <h4 class="text-sm font-bold text-slate-900">${sanitizeHTML(post.title)}</h4>
+            <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+              ${sanitizeHTML(post.body.substring(0, 120))}${post.body.length > 120 ? '…' : ''}
+            </p>
+          </article>
+        `).join('');
+      })
+      .catch(error => {
+        // ❌ Error - cambiar a estado REJECTED
+        setState(UI_STATE.REJECTED, `❌ Error: ${error.message}`);
+        resultsEl.innerHTML = ''; // 🧹 Limpiar resultados
+      });
+  }
+
+  // 6. Evento click del botón
+  btn.addEventListener('click', () => {
+    const userId = parseInt(input.value.trim());
+    
+    // Validar ID (1-10)
+    if (isNaN(userId) || userId < 1 || userId > 10) {
+      setState(UI_STATE.REJECTED, '⚠️ Ingresa un ID válido entre 1 y 10.');
+      resultsEl.innerHTML = '';
+      return;
+    }
+    
+    // Ejecutar búsqueda
+    searchPostsByUser(userId);
+  });
+
+  // 7. Evento Enter en el input
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') btn.click(); // Simular click en el botón
+  });
+
+  // 8. Búsqueda automática inicial (usuario ID 1)
+  searchPostsByUser(1);
+}
+
 // REPORTES
 
 let currentReportData = null;

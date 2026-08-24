@@ -414,29 +414,35 @@
         <div id="any-result" class="card p-6"></div>
       </section>
 
-      <!-- MAQUINA DE ESTADOS -->
+      <!-- PASO 7 — MÁQUINA DE ESTADOS -->
       <section id="page-maquina-estados" class="page-section hidden">
-        <div class="flex items-center gap-3 mb-4">
-          <span class="bg-pink-500/10 text-pink-400 text-xs font-bold px-2 py-1 rounded">Paso 7</span>
-          <h2 class="text-xl font-bold">Máquina de Estados: Buscar posts por usuario</h2>
-        </div>
-        <p class="text-slate-400 text-sm mb-4">Input de búsqueda con estados visuales: <span class="text-yellow-400">PENDING</span> → <span class="text-green-400">FULFILLED</span> o <span class="text-red-400">REJECTED</span>.</p>
-        <div class="bg-slate-900 rounded-xl p-6 border border-slate-800">
-          <div class="flex gap-2 mb-4">
-            <input type="number" id="user-id-input" placeholder="ID de usuario (1-10)" min="1" max="10"
-                   class="flex-grow px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <button id="search-btn" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg transition-colors flex items-center gap-2">
+        <header class="mb-6">
+          <span class="section-badge">Paso 07</span>
+          <h2 class="mt-3 text-2xl font-extrabold text-slate-900 tracking-tight">Máquina de estados: buscar por usuario</h2>
+          <p class="mt-2 text-slate-500 max-w-2xl leading-relaxed">
+            Buscador con estados visuales:
+            <strong class="text-amber-600 font-semibold">PENDING</strong>,
+            <strong class="text-emerald-600 font-semibold">FULFILLED</strong> y
+            <strong class="text-red-600 font-semibold">REJECTED</strong>.
+          </p>
+        </header>
+        <div class="card p-6">
+          <form class="flex flex-col sm:flex-row gap-3 mb-5" onsubmit="return false;">
+            <input type="number" id="user-id-input" placeholder="ID de usuario (1-10)" min="1" max="10" aria-label="ID de usuario"
+                   class="input flex-grow">
+            <button id="search-btn" type="button" class="btn-primary shrink-0">
               <span id="btn-text">Buscar</span>
-              <svg id="btn-spinner" class="hidden w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              <svg id="btn-spinner" class="hidden w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
               </svg>
             </button>
-          </div>
-          <div id="search-status" class="hidden mb-3 p-3 rounded-lg text-sm font-medium"></div>
-          <div id="search-results" class="space-y-2"></div>
+          </form>
+          <div id="search-status" class="hidden mb-4 px-4 py-3 rounded-xl text-sm font-medium" role="status"></div>
+          <div id="search-results" class="space-y-2.5"></div>
         </div>
       </section>
+      
 
       <!-- VIDEOS -->
       <section id="page-videos" class="page-section hidden">
