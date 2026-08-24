@@ -951,6 +951,73 @@ function loadUserWithTodos(userId) {
     });
 }
 
+// 13. VIDEOS — getUserMedia(): otra Promise del navegador
+
+//  CÓDIGO DE LA CÁMARA
+function initVideos() {
+  const video = document.getElementById('video-preview');
+  const canvas = document.getElementById('photo-canvas');
+  const photoStatus = document.getElementById('photo-status');
+  const videoInfo = document.getElementById('video-info');
+  const startBtn = document.getElementById('start-camera');
+  const stopBtn = document.getElementById('stop-camera');
+  const captureBtn = document.getElementById('capture-photo');
+  let stream = null;
+
+  // 1. ¿Qué API se usa para acceder a la cámara?
+  // R: navigator.mediaDevices.getUserMedia({ video: true })
+  startBtn.addEventListener('click', () => {
+    navigator.mediaDevices.getUserMedia({ video: true })   // Esta API devuelve una Promise que resuelve con un MediaStream.
+      .then(s => {
+        stream = s;
+        video.srcObject = s;
+        startBtn.classList.add('hidden');
+        stopBtn.classList.remove('hidden');
+        captureBtn.classList.remove('hidden');
+        videoInfo.innerHTML = `
+          <p class="text-emerald-600 font-semibold">Cámara activa</p>
+          <p>Resolución: ${video.videoWidth || '…'} × ${video.videoHeight || '…'} px</p>
+        `;
+        photoStatus.textContent = 'Listo para capturar.';
+      })
+
+      .catch(err => {
+        // 2. ¿Cómo se manejan los errores de permisos?
+        // R: Con .catch() que captura el error y muestra un mensaje
+        videoInfo.innerHTML = `<p class="text-red-600 font-semibold">No se pudo acceder a la cámara: ${sanitizeHTML(err.message)}</p>`;
+        //    informativo en la interfaz.
+      });
+  });
+
+  // 4. ¿Cómo se detiene la transmisión de video?
+  // R: Se detiene con stream.getTracks().forEach(track => track.stop())
+  stopBtn.addEventListener('click', () => {
+    if (!stream) return;
+    stream.getTracks().forEach(track => track.stop());   // Esto libera los recursos de la cámara.
+    stream = null;
+    video.srcObject = null;
+    startBtn.classList.remove('hidden');
+    stopBtn.classList.add('hidden');
+    captureBtn.classList.add('hidden');
+    videoInfo.innerHTML = `<p class="text-slate-500">Cámara detenida.</p>`;
+    photoStatus.textContent = 'No hay foto capturada todavía.';
+  });
+
+    // Capturar foto
+  captureBtn.addEventListener('click', () => {
+    if (!stream) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.classList.remove('hidden');
+    photoStatus.innerHTML = `
+      <p class="text-emerald-600 font-semibold text-sm">Foto capturada</p>
+      <p class="text-xs text-slate-400 mt-0.5">${canvas.width} × ${canvas.height} px</p>
+    `;
+  });
+}
+
 // REPORTES
 
 let currentReportData = null;
