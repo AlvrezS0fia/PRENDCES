@@ -834,6 +834,123 @@ function loadContactData() {
   `;
 }
 
+// 12. USUARIO + TAREAS — Promise.all dentro de una carrera con timeout
+
+// Carga usuario y TODOs con timeout de 3 segundos
+function loadUserWithTodos(userId) {
+  // 1. Obtener el contenedor
+  const container = document.getElementById('user-todos-result');
+  if (!container) return;
+
+  // 2. Mostrar indicador de carga
+  showLoading('user-todos-result', 'Consultando usuario y sus tareas…');
+
+  // 3. Promesa para obtener el usuario
+  const userPromise = fetch(`${API}/users/${userId}`).then(r => {
+    if (!r.ok) throw new Error(`Usuario ${userId} no encontrado`);
+    return r.json();
+  });
+
+  // 4. Promesa para obtener los TODOs del usuario
+  const todosPromise = fetch(`${API}/users/${userId}/todos`).then(r => {
+    if (!r.ok) throw new Error(`Tareas del usuario ${userId} no encontradas`);
+    return r.json();
+  });
+
+  // 5. Timeout de 3 segundos
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Tiempo de espera agotado (3s)')), 3000);
+  });
+
+  // 6. Carrera: Promise.all (usuario + tareas) vs timeout
+  Promise.race([
+    Promise.all([userPromise, todosPromise]), // Combinación de promesas
+    timeoutPromise                             // Temporizador
+  ])
+    // 7. Caso exitoso: usuario y tareas cargados
+    .then(([user, todos]) => {
+      const total = todos.length;
+      const completed = todos.filter(t => t.completed).length;
+      const pending = total - completed;
+      const rate = total ? Math.round((completed / total) * 100) : 0;
+
+      container.innerHTML = `
+        <div class="card p-6 animate-fade-in">
+          <!-- Información del usuario -->
+          <div class="flex items-start justify-between">
+            <div>
+              <h3 class="text-lg font-extrabold text-slate-900 tracking-tight">
+                ${sanitizeHTML(user.name)}
+              </h3>
+              <p class="text-sm text-primary-600 font-semibold mt-0.5">
+                ${sanitizeHTML(user.email)}
+              </p>
+              <p class="text-xs text-slate-400 mt-1">
+                @${sanitizeHTML(user.username)}
+              </p>
+            </div>
+            <span class="chip-brand">Usuario #${user.id}</span>
+          </div>
+
+          <!-- Estadísticas de tareas -->
+          <div class="grid grid-cols-2 gap-3 mt-5">
+            <div class="rounded-xl bg-emerald-50 ring-1 ring-inset ring-emerald-100 p-4 text-center">
+              <p class="text-2xl font-extrabold text-emerald-600 tabular-nums">${completed}</p>
+              <p class="text-[11px] font-bold uppercase tracking-wider text-emerald-700/70 mt-1">
+                ✅ Completadas
+              </p>
+            </div>
+            <div class="rounded-xl bg-amber-50 ring-1 ring-inset ring-amber-100 p-4 text-center">
+              <p class="text-2xl font-extrabold text-amber-600 tabular-nums">${pending}</p>
+              <p class="text-[11px] font-bold uppercase tracking-wider text-amber-700/70 mt-1">
+                ⏳ Pendientes
+              </p>
+            </div>
+          </div>
+
+          <!-- Barra de progreso -->
+          <div class="mt-5">
+            <div class="flex justify-between text-xs font-semibold mb-1.5">
+              <span class="text-slate-500">📊 Progreso</span>
+              <span class="text-primary-700 tabular-nums">${rate}%</span>
+            </div>
+            <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+              <div class="h-full rounded-full bg-gradient-to-r from-primary-500 to-violet-500 transition-all duration-700" 
+                   style="width:${rate}%"></div>
+            </div>
+          </div>
+
+          <!-- Lista de tareas (expandible) -->
+          <details class="mt-5">
+            <summary class="text-xs font-semibold text-primary-600 cursor-pointer hover:text-primary-700">
+              📋 Ver lista de tareas (${total})
+            </summary>
+            <ul class="mt-3 space-y-1.5 max-h-48 overflow-y-auto">
+              ${todos.map(todo => `
+                <li class="flex items-start gap-2 text-sm ${todo.completed ? 'text-slate-400 line-through' : 'text-slate-700'}">
+                  <span class="mt-0.5">${todo.completed ? '✅' : '⏳'}</span>
+                  ${sanitizeHTML(todo.title)}
+                </li>
+              `).join('')}
+            </ul>
+          </details>
+        </div>
+      `;
+    })
+    // 8. Caso de error: timeout u otro error
+    .catch(error => {
+      const isTimeout = error.message.includes('Tiempo de espera');
+      container.innerHTML = `
+        <div class="px-4 py-3 rounded-xl text-sm font-medium ${isTimeout 
+          ? 'bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200' 
+          : 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-200'}">
+          ${isTimeout ? '⏰ ' : '❌ '}${sanitizeHTML(error.message)}
+          ${isTimeout ? '<p class="mt-1 text-xs font-normal">La API tardó más de 3 segundos en responder.</p>' : ''}
+        </div>
+      `;
+    });
+}
+
 // REPORTES
 
 let currentReportData = null;
