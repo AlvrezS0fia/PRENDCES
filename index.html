@@ -402,28 +402,16 @@
         <div id="race-result" class="card p-6"></div>
       </section>
 
-      <!-- PROMISE RACE -->
-      <section id="page-promise-race" class="page-section hidden">
-        <div class="flex items-center gap-3 mb-4">
-          <span class="bg-rose-500/10 text-rose-400 text-xs font-bold px-2 py-1 rounded">Paso 5</span>
-          <h2 class="text-xl font-bold">Promise.race: Carrera contra el tiempo</h2>
-        </div>
-        <p class="text-slate-400 text-sm mb-4">Competimos: la petición a la API vs un temporizador de 2 segundos.</p>
-        <div id="race-result" class="bg-slate-900 rounded-xl p-6 border border-slate-800">
-          <p class="text-slate-500">Esperando resultado de la carrera...</p>
-        </div>
-      </section>
-
-      <!-- PROMISE ANY -->
+      <!-- PASO 6 — PROMISE.ANY -->
       <section id="page-promise-any" class="page-section hidden">
-        <div class="flex items-center gap-3 mb-4">
-          <span class="bg-cyan-500/10 text-cyan-400 text-xs font-bold px-2 py-1 rounded">Paso 6</span>
-          <h2 class="text-xl font-bold">Promise.any: El primer servidor que responda</h2>
-        </div>
-        <p class="text-slate-400 text-sm mb-4">Intentamos 3 endpoints. Nos quedamos con el primero que tenga éxito.</p>
-        <div id="any-result" class="bg-slate-900 rounded-xl p-6 border border-slate-800">
-          <p class="text-slate-500">Buscando el primer éxito...</p>
-        </div>
+        <header class="mb-6">
+          <span class="section-badge">Paso 06</span>
+          <h2 class="mt-3 text-2xl font-extrabold text-slate-900 tracking-tight">Promise.any: el primer servidor que responda</h2>
+          <p class="mt-2 text-slate-500 max-w-2xl leading-relaxed">
+            Intentamos 3 endpoints distintos y nos quedamos con el primero que tenga éxito.
+          </p>
+        </header>
+        <div id="any-result" class="card p-6"></div>
       </section>
 
       <!-- MAQUINA DE ESTADOS -->

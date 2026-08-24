@@ -572,6 +572,72 @@ function loadRaceResult() {
     .finally(() => console.log('[Paso 5] Promise.race completada.'));
 }
 
+// 9. PASO 06 — PROMISE.ANY: primer éxito entre 3 endpoints
+
+function loadAnyResult() {
+  // 1. Mostrar indicador de carga
+  showLoading('any-result');
+
+  // 2. Definir 3 endpoints para intentar
+  const endpoints = [`${API}/posts/1`, `${API}/posts/2`, `${API}/posts/3`];
+  
+  // 3. Crear promesas para cada endpoint
+  const promises = endpoints.map(url =>
+    fetch(url).then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json(); // Convertir a JSON
+    })
+  );
+
+  // 4. Promise.any - el PRIMER ÉXITO es el que cuenta
+  Promise.any(promises)
+    // 5. Caso 1: Al menos un éxito
+    .then(result => {
+      const container = document.getElementById('any-result');
+      if (!container) return;
+      
+      // Mostrar el primer post exitoso
+      container.innerHTML = `
+        <div class="flex items-start gap-4">
+          <span class="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="6"/>
+              <polyline points="8.21 13.5 7 23 12 20 17 23 15.79 13.5"/>
+            </svg>
+          </span>
+          <div>
+            <p class="font-extrabold text-slate-900">🏆 Primer éxito encontrado</p>
+            <p class="text-sm text-slate-600 mt-1">${sanitizeHTML(result.title)}</p>
+            <p class="text-xs text-slate-400 mt-1.5">📝 Post ID: ${result.id} · 👤 Autor: usuario ${result.userId}</p>
+          </div>
+        </div>
+      `;
+    })
+    // 6. Caso 2: Todos fallaron
+    .catch(error => {
+      const container = document.getElementById('any-result');
+      if (!container) return;
+      
+      // Mostrar mensaje de error general
+      container.innerHTML = `
+        <div class="flex items-start gap-4">
+          <span class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+          </span>
+          <div>
+            <p class="font-extrabold text-slate-900">❌ Todos los intentos fallaron</p>
+            <p class="text-sm text-slate-600 mt-1">${sanitizeHTML(error.message)}</p>
+          </div>
+        </div>
+      `;
+    })
+    // 7. Siempre se ejecuta
+    .finally(() => console.log('[Paso 6] Promise.any completada.'));
+}
 
 // REPORTES
 
