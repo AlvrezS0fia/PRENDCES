@@ -759,6 +759,81 @@ function initSearchIfNeeded() {
   searchPostsByUser(1);
 }
 
+// 11. CONTACTO — tarjetas de canales + horario de atención
+
+// Función para cargar datos de contacto
+function loadContactData() {
+  // 1. Obtener el contenedor
+  const container = document.getElementById('contact-content');
+  if (!container) return;
+
+  // 2. Evitar recargar múltiples veces
+  if (container.dataset.loaded) return;
+  container.dataset.loaded = 'true';
+
+  // 3. Datos de contacto (canales de comunicación)
+  const methods = [
+    {
+      label: 'Teléfono',
+      value: '+57 601 123 4567',
+      icon: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>'
+    },
+    {
+      label: 'Correo',
+      value: 'taller.promesas@ejemplo.com',
+      icon: '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>'
+    },
+    {
+      label: 'Dirección',
+      value: 'Centro de Formación — Sede Principal, Aula 42',
+      icon: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'
+    }
+  ];
+
+  // 4. Renderizar el contenido
+  container.innerHTML = `
+    <div class="space-y-5">
+      <!-- Tarjetas de canales de contacto -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        ${methods.map(m => `
+          <div class="card card-hover p-6">
+            <span class="w-11 h-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${m.icon}</svg>
+            </span>
+            <p class="mt-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">${m.label}</p>
+            <p class="mt-1 font-semibold text-slate-800 break-words">${m.value}</p>
+          </div>
+        `).join('')}
+      </div>
+     
+      <!-- Horario de atención -->
+      <div class="card p-6">
+        <h3 class="font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+          <svg class="w-5 h-5 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Horario de atención
+        </h3>
+        <dl class="mt-4 divide-y divide-slate-100 max-w-md">
+          <div class="flex justify-between py-2.5 text-sm">
+            <dt class="text-slate-500">Lunes a viernes</dt>
+            <dd class="font-semibold text-slate-800 tabular-nums">8:00 — 18:00</dd>
+          </div>
+          <div class="flex justify-between py-2.5 text-sm">
+            <dt class="text-slate-500">Sábados</dt>
+            <dd class="font-semibold text-slate-800 tabular-nums">9:00 — 13:00</dd>
+          </div>
+          <div class="flex justify-between py-2.5 text-sm">
+            <dt class="text-slate-500">Domingos y festivos</dt>
+            <dd class="font-semibold text-slate-400">Cerrado</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  `;
+}
+
 // REPORTES
 
 let currentReportData = null;
