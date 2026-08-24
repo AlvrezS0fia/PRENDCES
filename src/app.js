@@ -1019,7 +1019,6 @@ function initVideos() {
 }
 
 // 14. REPORTES — generación, descarga TXT, CSV e impresión
-// ================================================================
 
 // Variables globales para el reporte
 let currentReportData = null;
@@ -1278,6 +1277,171 @@ function initGeolocation() {
   });
 }
 
+// 16. DASHBOARD — métricas globales con auto-refresco (30 s)
+
+// Variable global para controlar el intervalo de actualización
+let dashboardUpdateInterval = null;
+
+function loadDashboardData() {
+  // 1. Obtener el contenedor
+  const container = document.getElementById('dashboard-content');
+  if (!container) return;
+
+  // 2. Limpiar intervalos anteriores para evitar duplicados
+  if (dashboardUpdateInterval) {
+    clearInterval(dashboardUpdateInterval);
+    dashboardUpdateInterval = null;
+  }
+
+  // 3. Función para conectar botones después de renderizar
+  function bindDashboardButtons() {
+    const refreshBtn = document.getElementById('refresh-dashboard-btn');
+    const retryBtn = document.getElementById('retry-dashboard-btn');
+    if (refreshBtn) refreshBtn.addEventListener('click', fetchDashboardMetrics);
+    if (retryBtn) retryBtn.addEventListener('click', fetchDashboardMetrics);
+  }
+
+  // 4. Función principal para obtener métricas del dashboard
+  function fetchDashboardMetrics() {
+    // Mostrar indicador de carga
+    container.innerHTML = `
+      <div class="flex flex-col items-center justify-center py-16 gap-3">
+        <div class="animate-spin rounded-full h-10 w-10 border-[3px] border-primary-100 border-t-primary-600"></div>
+        <p class="text-sm text-slate-400">Consultando métricas globales…</p>
+      </div>
+    `;
+
+    // 5. Promise.all con 4 peticiones en paralelo
+    Promise.all([
+      fetch(`${API}/users`).then(r => r.json()),
+      fetch(`${API}/posts`).then(r => r.json()),
+      fetch(`${API}/comments`).then(r => r.json()),
+      fetch(`${API}/albums`).then(r => r.json())
+    ])
+    // 6. Procesar los datos recibidos
+    .then(([users, posts, comments, albums]) => {
+      // 7. Calcular posts por usuario
+      const userPostCount = {};
+      posts.forEach(post => {
+        userPostCount[post.userId] = (userPostCount[post.userId] || 0) + 1;
+      });
+
+      // 8. Obtener Top 3 autores con más posts
+      const topUsers = Object.entries(userPostCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([userId, count]) => {
+          const user = users.find(u => u.id === parseInt(userId));
+          return { name: user ? user.name : `Usuario ${userId}`, count };
+        });
+
+      // 9. Seleccionar un post aleatorio
+      const randomPost = posts[Math.floor(Math.random() * posts.length)];
+
+      // 10. Configurar métricas para las tarjetas
+      const stats = [
+        { label: 'Usuarios', value: users.length, tone: 'bg-primary-50 text-primary-600',
+          icon: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
+        { label: 'Posts', value: posts.length, tone: 'bg-sky-50 text-sky-600',
+          icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' },
+        { label: 'Comentarios', value: comments.length, tone: 'bg-violet-50 text-violet-600',
+          icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
+        { label: 'Álbumes', value: albums.length, tone: 'bg-amber-50 text-amber-600',
+          icon: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>' }
+      ];
+
+      // 11. Renderizar el dashboard
+      container.innerHTML = `
+        <div class="space-y-5 animate-fade-in">
+          <!-- Tarjetas métricas -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+            ${stats.map(s => `
+              <div class="card card-hover p-6">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400">${s.label}</p>
+                    <p class="mt-2 text-3xl font-extrabold text-slate-900 tabular-nums">${s.value}</p>
+                  </div>
+                  <span class="w-11 h-11 rounded-xl ${s.tone} flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${s.icon}</svg>
+                  </span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Ranking y Post destacado -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <!-- Ranking Top 3 autores -->
+            <div class="card p-6">
+              <h3 class="font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><polyline points="8.21 13.5 7 23 12 20 17 23 15.79 13.5"/></svg>
+                Top 3 autores
+              </h3>
+              <ol class="mt-4 space-y-2.5">
+                ${topUsers.map((user, index) => `
+                  <li class="flex items-center gap-3 rounded-xl ring-1 ring-slate-200 bg-white px-4 py-3">
+                    <span class="w-8 h-8 rounded-full ${RANK_STYLES[index]} flex items-center justify-center text-xs font-extrabold shrink-0 tabular-nums">${index + 1}</span>
+                    <span class="flex-1 min-w-0 truncate text-sm font-semibold text-slate-800">${sanitizeHTML(user.name)}</span>
+                    <span class="chip-brand shrink-0 tabular-nums">${user.count} posts</span>
+                  </li>
+                `).join('')}
+              </ol>
+            </div>
+
+            <!-- Post destacado aleatorio -->
+            <div class="card p-6">
+              <h3 class="font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Post destacado
+              </h3>
+              <div class="mt-4 rounded-xl bg-primary-50 ring-1 ring-inset ring-primary-100 p-5">
+                <h4 class="font-bold text-primary-900 leading-snug">${sanitizeHTML(randomPost.title)}</h4>
+                <p class="text-sm text-primary-800/80 mt-2 leading-relaxed">${sanitizeHTML(randomPost.body)}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de refresco -->
+          <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white ring-1 ring-slate-200 px-4 py-3">
+            <p class="flex items-center gap-2 text-xs text-slate-500">
+              <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Actualización automática cada 30 segundos
+            </p>
+            <button id="refresh-dashboard-btn" class="btn-secondary text-xs">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              Actualizar ahora
+            </button>
+          </div>
+        </div>
+      `;
+
+      bindDashboardButtons();
+    })
+    // 12. Manejo de errores
+    .catch(error => {
+      container.innerHTML = `
+        <div class="card p-6 !border-red-200">
+          <div class="flex items-start gap-3">
+            <svg class="w-6 h-6 text-red-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div>
+              <p class="font-extrabold text-slate-900">No se pudo cargar el dashboard</p>
+              <p class="text-sm text-slate-500 mt-1">${sanitizeHTML(error.message)}</p>
+              <button id="retry-dashboard-btn" class="btn-primary mt-4">Reintentar</button>
+            </div>
+          </div>
+        </div>
+      `;
+      bindDashboardButtons();
+    });
+  }
+
+  // 13. Cargar datos iniciales
+  fetchDashboardMetrics();
+
+  // 14. Configurar actualización automática cada 30 segundos
+  dashboardUpdateInterval = setInterval(fetchDashboardMetrics, 30000);
+}
 
 // ================================================================
 // SIDEBAR Y NAVEGACION
