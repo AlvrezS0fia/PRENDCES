@@ -1444,7 +1444,6 @@ function loadDashboardData() {
 }
 
 // 17. SIDEBAR RESPONSIVO — abrir/cerrar según el tamaño de pantalla
-// ================================================================
 
 function initSidebar() {
   // 1. Obtener referencias a los elementos del DOM
@@ -1525,108 +1524,14 @@ function initSidebar() {
   handleBreakpointChange();
 }
 
-// ================================================================
-// SIDEBAR Y NAVEGACION
-// ================================================================
-
-function initSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  const toggleBtn = document.getElementById('sidebar-toggle');
-  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-  const navLinks = document.querySelectorAll('.nav-link');
-  const mainContent = document.getElementById('main-content');
-
-  function isMobile() {
-    return window.matchMedia('(max-width: 1023px)').matches;
-  }
-
-  function closeSidebar() {
-    sidebar.classList.add('-translate-x-full');
-    if (isMobile()) {
-      overlay.classList.add('hidden');
-    }
-    if (!isMobile() && mainContent) {
-      mainContent.classList.remove('ml-64');
-    }
-  }
-
-  function openSidebar() {
-    sidebar.classList.remove('-translate-x-full');
-    if (isMobile()) {
-      overlay.classList.remove('hidden');
-    }
-    if (!isMobile() && mainContent) {
-      mainContent.classList.add('ml-64');
-    }
-  }
-
-  function handleBreakpointChange() {
-    if (isMobile()) {
-      closeSidebar();
-    } else {
-      sidebar.classList.remove('-translate-x-full');
-      overlay.classList.add('hidden');
-      if (mainContent) {
-        mainContent.classList.add('ml-64');
-      }
-    }
-  }
-
-  const mql = window.matchMedia('(max-width: 1023px)');
-
-  function handleBreakpointChangeDebounced() {
-    clearTimeout(handleBreakpointChange.timer);
-    handleBreakpointChange.timer = setTimeout(handleBreakpointChange, 50);
-  }
-
-  if (mobileMenuBtn) {
-    mobileMenuBtn.addEventListener('click', () => {
-      const isOpen = !sidebar.classList.contains('-translate-x-full');
-      if (isOpen) {
-        closeSidebar();
-      } else {
-        openSidebar();
-      }
-    });
-  }
-
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', closeSidebar);
-  }
-
-  if (overlay) {
-    overlay.addEventListener('click', closeSidebar);
-  }
-
-  navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const page = link.getAttribute('data-page');
-      navigateTo(page);
-      if (isMobile()) {
-        closeSidebar();
-      }
-    });
-  });
-
-  window.addEventListener('hashchange', handleRoute);
-  mql.addEventListener('change', handleBreakpointChangeDebounced);
-  handleBreakpointChange();
-}
-
-// ================================================================
-// INICIALIZACION
-// ================================================================
+// 18. ARRANQUE DE LA APLICACIÓN
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('[App] DOM listo. Iniciando SPA...');
-
-  initSidebar();
-  initVideos();
-  initReports();
-  initGeolocation();
-  initSearchIfNeeded();
-
-  handleRoute();
+  console.log('[App] DOM listo. Iniciando SPA con el tema Indigo Academico.');
+  initSidebar();        // Menú lateral y breakpoints
+  initVideos();         // Cámara
+  initReports();        // Generador de reportes
+  initGeolocation();    // Mapa y coordenadas
+  initSearchIfNeeded(); // Máquina de estados
+  handleRoute();        // Router inicial (muestra la página del hash)
 });
