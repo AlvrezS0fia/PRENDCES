@@ -1443,6 +1443,88 @@ function loadDashboardData() {
   dashboardUpdateInterval = setInterval(fetchDashboardMetrics, 30000);
 }
 
+// 17. SIDEBAR RESPONSIVO — abrir/cerrar según el tamaño de pantalla
+// ================================================================
+
+function initSidebar() {
+  // 1. Obtener referencias a los elementos del DOM
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const toggleBtn = document.getElementById('sidebar-toggle');
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const navLinks = document.querySelectorAll('.nav-link');
+  const mainContent = document.getElementById('main-content');
+
+  // 2. Detectar si estamos en móvil (ancho <= 1023px)
+  function isMobile() {
+    return window.matchMedia('(max-width: 1023px)').matches;
+  }
+
+  // 3. Función para cerrar el sidebar
+  function closeSidebar() {
+    sidebar.classList.add('-translate-x-full');   // Desliza fuera de pantalla
+    if (isMobile()) overlay.classList.add('hidden');
+    if (!isMobile() && mainContent) mainContent.classList.remove('ml-64');
+  }
+
+  // 4. Función para abrir el sidebar
+  function openSidebar() {
+    sidebar.classList.remove('-translate-x-full');
+    if (isMobile()) overlay.classList.remove('hidden');
+    if (!isMobile() && mainContent) mainContent.classList.add('ml-64');
+  }
+
+  // 5. Manejar cambio de breakpoint (móvil/desktop)
+  function handleBreakpointChange() {
+    if (isMobile()) {
+      closeSidebar();
+    } else {
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.add('hidden');
+      if (mainContent) mainContent.classList.add('ml-64');
+    }
+  }
+
+  // 6. Debounce para eventos resize (evita ejecuciones excesivas)
+  const mql = window.matchMedia('(max-width: 1023px)');
+  function handleBreakpointChangeDebounced() {
+    clearTimeout(handleBreakpointChange.timer);
+    handleBreakpointChange.timer = setTimeout(handleBreakpointChange, 50);
+  }
+
+  // 7. Evento click del botón de menú móvil
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', () => {
+      const isOpen = !sidebar.classList.contains('-translate-x-full');
+      isOpen ? closeSidebar() : openSidebar();
+    });
+  }
+
+  // 8. Evento click del botón cerrar (dentro del sidebar)
+  if (toggleBtn) toggleBtn.addEventListener('click', closeSidebar);
+
+  // 9. Evento click del overlay (fondo oscuro)
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+
+  // 10. Evento click en enlaces de navegación
+  navLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();                       // Controlamos la navegación
+      navigateTo(link.getAttribute('data-page'));
+      if (isMobile()) closeSidebar();
+    });
+  });
+
+  // 11. Evento hashchange para navegación SPA
+  window.addEventListener('hashchange', handleRoute);
+
+  // 12. Detectar cambios en el breakpoint
+  mql.addEventListener('change', handleBreakpointChangeDebounced);
+
+  // 13. Estado inicial correcto
+  handleBreakpointChange();
+}
+
 // ================================================================
 // SIDEBAR Y NAVEGACION
 // ================================================================
