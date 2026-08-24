@@ -16,7 +16,8 @@
       {
         "definition-list": "off"
       }
-    ]
+    ],
+    "no-inline-styles": "off"
   },
   "browserslist": [
     "defaults",

@@ -1025,13 +1025,14 @@ function initVideos() {
 }
 
 // 14. REPORTES — generación, descarga TXT, CSV e impresión
+// SISTEMA DE REPORTES MEJORADO
 
 // Variables globales para el reporte
+// SISTEMA DE REPORTES MEJORADO
 let currentReportData = null;
 let reportGenerationTime = 0;
 
 function initReports() {
-  // 1. Obtener referencias a los elementos del DOM
   const genUsersBtn = document.getElementById('gen-report-users');
   const genPostsBtn = document.getElementById('gen-report-posts');
   const genCombinedBtn = document.getElementById('gen-report-combined');
@@ -1041,43 +1042,8 @@ function initReports() {
   const exportCsvBtn = document.getElementById('export-csv');
   const recordCountSelect = document.getElementById('record-count');
   const timeDisplay = document.getElementById('report-time');
-
-  // 2. Validación de existencia
-  if (!genUsersBtn) return;
-
-  // 3. Construye el texto plano del reporte y lo pinta en la terminal
-  function renderReport(title, lines) {
-    const timestamp = new Date().toISOString();
-    const report = [
-      '========================================',
-      `  REPORTE: ${title}`,
-      `  Generado: ${timestamp}`,
-      '========================================',
-      '',
-      ...lines,
-      '',
-      '========================================',
-      '  Fin del reporte',
-      '========================================'
-    ].join('\n');
-
-    currentReportData = report;
-    previewEl.textContent = report;
-    downloadBtn.classList.remove('hidden');
-    printBtn.classList.remove('hidden');
-    if (exportCsvBtn) exportCsvBtn.classList.remove('hidden');
-
-    if (timeDisplay) {
-      timeDisplay.textContent = `Generación: ${reportGenerationTime} ms`;
-    }
-  }
-
-  // 4. Obtener la cantidad de registros seleccionada
-  function getRecordCount() {
-    return recordCountSelect ? parseInt(recordCountSelect.value) : 5;
-  }
-
-  // 5. Función para descargar archivos
+  
+  // 1. Nuevo botón "Exportar a CSV" que genere un archivo .csv
   function triggerDownload(content, filename, mime) {
     const blob = new Blob([content], { type: mime });
     const url = URL.createObjectURL(blob);
@@ -1087,52 +1053,108 @@ function initReports() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(url); // 🧹 Liberar memoria
   }
-
-  // 6. Reporte de Usuarios
+  
+  // Función para exportar a CSV
+  function exportToCSV() {
+    if (!currentReportData) return;
+    
+    // Convertir el reporte a formato CSV
+    const lines = currentReportData.split('\n');
+    const csvLines = lines.map(line => {
+      // Escapar comillas y agregar comillas dobles
+      return `"${line.replace(/"/g, '""')}"`;
+    }).join('\n');
+    
+    triggerDownload(csvLines, `reporte-${Date.now()}.csv`, 'text/csv');
+  }
+  
+  // Función para renderizar el reporte con tiempo
+  function renderReport(title, lines) {
+    const startTime = performance.now(); // ⏱️ Iniciar contador
+    
+    const timestamp = new Date().toISOString();
+    const report = [
+      '========================================',
+      `  📊 REPORTE: ${title}`,
+      `  📅 Generado: ${timestamp}`,
+      '========================================',
+      '',
+      ...lines,
+      '',
+      '========================================',
+      '  🏁 Fin del reporte',
+      '========================================'
+    ].join('\n');
+    
+    // 3. Contador de tiempo de generación
+    const endTime = performance.now();
+    reportGenerationTime = Math.round(endTime - startTime);
+    
+    currentReportData = report;
+    previewEl.textContent = report;
+    downloadBtn.classList.remove('hidden');
+    printBtn.classList.remove('hidden');
+    exportCsvBtn.classList.remove('hidden');
+    
+    if (timeDisplay) {
+      timeDisplay.textContent = `⚡ Generación: ${reportGenerationTime} ms`;
+    }
+  }
+  
+  // 2. Selector de cantidad de registros (5, 10, 15, 20)
+  function getRecordCount() {
+    return recordCountSelect ? parseInt(recordCountSelect.value) : 5;
+  }
+  
+  // Generar reporte de usuarios
   genUsersBtn.addEventListener('click', async () => {
     try {
       const count = getRecordCount();
       const response = await fetch(`${API}/users?_limit=${count}`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const users = await response.json();
+      
       const lines = users.map((u, i) => [
-        `Usuario #${i + 1}:`,
-        `  Nombre: ${u.name}`,
-        `  Username: ${u.username}`,
-        `  Email: ${u.email}`,
-        `  Empresa: ${u.company.name}`,
-        `  Ciudad: ${u.address.city}`,
+        `👤 Usuario #${i + 1}:`,
+        `  📛 Nombre: ${u.name}`,
+        `  🏷️ Username: ${u.username}`,
+        `  ✉️ Email: ${u.email}`,
+        `  🏢 Empresa: ${u.company.name}`,
+        `  🌆 Ciudad: ${u.address.city}`,
         ''
       ].join('\n')).join('');
+      
       renderReport(`Reporte de Usuarios (${count})`, lines.split('\n'));
     } catch (error) {
-      previewEl.textContent = `Error generando el reporte: ${error.message}`;
+      previewEl.textContent = `❌ Error generando el reporte: ${error.message}`;
     }
   });
-
-  // 7. Reporte de Posts
+  
+  // Generar reporte de posts
   genPostsBtn.addEventListener('click', async () => {
     try {
       const count = getRecordCount();
       const response = await fetch(`${API}/posts?_limit=${count}`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const posts = await response.json();
+      
       const lines = posts.map(p => [
-        `Post #${p.id}:`,
-        `  Titulo: ${p.title}`,
-        `  Body: ${p.body.substring(0, 80)}...`,
-        `  Autor ID: ${p.userId}`,
+        `📝 Post #${p.id}:`,
+        `  📌 Titulo: ${p.title}`,
+        `  📄 Body: ${p.body.substring(0, 80)}...`,
+        `  👤 Autor ID: ${p.userId}`,
         ''
       ].join('\n')).join('');
+      
       renderReport(`Reporte de Posts (${count})`, lines.split('\n'));
     } catch (error) {
-      previewEl.textContent = `Error generando el reporte: ${error.message}`;
+      previewEl.textContent = `❌ Error generando el reporte: ${error.message}`;
     }
   });
-
-  // 8. Reporte Combinado (Promise.all)
+  
+  // Generar reporte combinado
   genCombinedBtn.addEventListener('click', async () => {
     try {
       const count = getRecordCount();
@@ -1140,40 +1162,40 @@ function initReports() {
         fetch(`${API}/users?_limit=${count}`),
         fetch(`${API}/posts?_limit=${count}`)
       ]);
+      
       if (!usersRes.ok || !postsRes.ok) throw new Error('Error al obtener los datos');
       const users = await usersRes.json();
       const posts = await postsRes.json();
+      
       const lines = [
-        '=== COMBINADO ===',
-        `--- Usuarios (${users.length}) ---`,
-        ...users.map(u => `  ${u.name} (${u.username})`),
-        `--- Posts (${posts.length}) ---`,
-        ...posts.map(p => `  Post #${p.id}: "${p.title.substring(0, 50)}..."`),
-        '--- Resumen ---',
-        `  Total usuarios: ${users.length}`,
-        `  Total posts: ${posts.length}`
+        '📊 === COMBINADO ===',
+        `👤 --- Usuarios (${users.length}) ---`,
+        ...users.map(u => `  📛 ${u.name} (@${u.username})`),
+        `📝 --- Posts (${posts.length}) ---`,
+        ...posts.map(p => `  📌 Post #${p.id}: "${p.title.substring(0, 50)}..."`),
+        '📈 --- Resumen ---',
+        `  👥 Total usuarios: ${users.length}`,
+        `  📄 Total posts: ${posts.length}`
       ];
+      
       renderReport(`Reporte Combinado (${count} usuarios)`, lines);
     } catch (error) {
-      previewEl.textContent = `Error generando el reporte: ${error.message}`;
+      previewEl.textContent = `❌ Error generando el reporte: ${error.message}`;
     }
   });
-
-  // 9. Exportar a CSV
+  
+  // Exportar CSV
   if (exportCsvBtn) {
-    exportCsvBtn.addEventListener('click', () => {
-      if (!currentReportData) return;
-      triggerDownload(currentReportData, `reporte-${Date.now()}.csv`, 'text/csv');
-    });
+    exportCsvBtn.addEventListener('click', exportToCSV);
   }
-
-  // 10. Descargar como TXT
+  
+  // Descargar TXT
   downloadBtn.addEventListener('click', () => {
     if (!currentReportData) return;
     triggerDownload(currentReportData, `reporte-${Date.now()}.txt`, 'text/plain');
   });
 
-  // 11. Imprimir reporte
+  // Imprimir
   printBtn.addEventListener('click', () => window.print());
 }
 
