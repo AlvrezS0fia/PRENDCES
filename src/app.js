@@ -1018,133 +1018,158 @@ function initVideos() {
   });
 }
 
-// REPORTES
+// 14. REPORTES — generación, descarga TXT, CSV e impresión
+// ================================================================
 
+// Variables globales para el reporte
 let currentReportData = null;
+let reportGenerationTime = 0;
 
 function initReports() {
+  // 1. Obtener referencias a los elementos del DOM
   const genUsersBtn = document.getElementById('gen-report-users');
   const genPostsBtn = document.getElementById('gen-report-posts');
   const genCombinedBtn = document.getElementById('gen-report-combined');
   const downloadBtn = document.getElementById('download-report');
   const printBtn = document.getElementById('print-report');
   const previewEl = document.getElementById('report-preview');
+  const exportCsvBtn = document.getElementById('export-csv');
+  const recordCountSelect = document.getElementById('record-count');
+  const timeDisplay = document.getElementById('report-time');
 
+  // 2. Validación de existencia
   if (!genUsersBtn) return;
 
+  // 3. Construye el texto plano del reporte y lo pinta en la terminal
   function renderReport(title, lines) {
     const timestamp = new Date().toISOString();
     const report = [
-      `========================================`,
+      '========================================',
       `  REPORTE: ${title}`,
       `  Generado: ${timestamp}`,
-      `========================================`,
-      ``,
+      '========================================',
+      '',
       ...lines,
-      ``,
-      `========================================`,
-      `  Fin del reporte`,
-      `========================================`
+      '',
+      '========================================',
+      '  Fin del reporte',
+      '========================================'
     ].join('\n');
 
     currentReportData = report;
     previewEl.textContent = report;
     downloadBtn.classList.remove('hidden');
     printBtn.classList.remove('hidden');
+    if (exportCsvBtn) exportCsvBtn.classList.remove('hidden');
+
+    if (timeDisplay) {
+      timeDisplay.textContent = `Generación: ${reportGenerationTime} ms`;
+    }
   }
 
+  // 4. Obtener la cantidad de registros seleccionada
+  function getRecordCount() {
+    return recordCountSelect ? parseInt(recordCountSelect.value) : 5;
+  }
+
+  // 5. Función para descargar archivos
+  function triggerDownload(content, filename, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // 6. Reporte de Usuarios
   genUsersBtn.addEventListener('click', async () => {
     try {
-      const response = await fetch(`${API}/users?_limit=5`);
+      const count = getRecordCount();
+      const response = await fetch(`${API}/users?_limit=${count}`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const users = await response.json();
-
       const lines = users.map((u, i) => [
         `Usuario #${i + 1}:`,
-        `  Nombre:     ${u.name}`,
-        `  Username:   ${u.username}`,
-        `  Email:      ${u.email}`,
-        `  Telefono:   ${u.phone}`,
-        `  Empresa:    ${u.company.name}`,
-        `  Ciudad:     ${u.address.city}`,
-        `  Website:    ${u.website}`,
-        ``
+        `  Nombre: ${u.name}`,
+        `  Username: ${u.username}`,
+        `  Email: ${u.email}`,
+        `  Empresa: ${u.company.name}`,
+        `  Ciudad: ${u.address.city}`,
+        ''
       ].join('\n')).join('');
-
-      renderReport('Reporte de Usuarios', lines.split('\n'));
+      renderReport(`Reporte de Usuarios (${count})`, lines.split('\n'));
     } catch (error) {
-      previewEl.innerHTML = `<p class="text-red-400">Error al generar reporte: ${sanitizeHTML(error.message)}</p>`;
+      previewEl.textContent = `Error generando el reporte: ${error.message}`;
     }
   });
 
+  // 7. Reporte de Posts
   genPostsBtn.addEventListener('click', async () => {
     try {
-      const response = await fetch(`${API}/posts?_limit=10`);
+      const count = getRecordCount();
+      const response = await fetch(`${API}/posts?_limit=${count}`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const posts = await response.json();
-
       const lines = posts.map(p => [
         `Post #${p.id}:`,
         `  Titulo: ${p.title}`,
         `  Body: ${p.body.substring(0, 80)}...`,
         `  Autor ID: ${p.userId}`,
-        ``
+        ''
       ].join('\n')).join('');
-
-      renderReport('Reporte de Posts', lines.split('\n'));
+      renderReport(`Reporte de Posts (${count})`, lines.split('\n'));
     } catch (error) {
-      previewEl.innerHTML = `<p class="text-red-400">Error al generar reporte: ${sanitizeHTML(error.message)}</p>`;
+      previewEl.textContent = `Error generando el reporte: ${error.message}`;
     }
   });
 
+  // 8. Reporte Combinado (Promise.all)
   genCombinedBtn.addEventListener('click', async () => {
     try {
+      const count = getRecordCount();
       const [usersRes, postsRes] = await Promise.all([
-        fetch(`${API}/users?_limit=5`),
-        fetch(`${API}/posts?_limit=5`)
+        fetch(`${API}/users?_limit=${count}`),
+        fetch(`${API}/posts?_limit=${count}`)
       ]);
-      if (!usersRes.ok || !postsRes.ok) throw new Error('Error al obtener datos');
-
+      if (!usersRes.ok || !postsRes.ok) throw new Error('Error al obtener los datos');
       const users = await usersRes.json();
       const posts = await postsRes.json();
-
       const lines = [
-        `=== COMBINADO ===`,
-        ``,
+        '=== COMBINADO ===',
         `--- Usuarios (${users.length}) ---`,
-        ...users.map(u => `  ${u.name} (${u.username}) - ${u.email}`),
-        ``,
+        ...users.map(u => `  ${u.name} (${u.username})`),
         `--- Posts (${posts.length}) ---`,
-        ...posts.map(p => `  Post #${p.id}: "${p.title.substring(0, 50)}..." (Usuario ${p.userId})`),
-        ``,
-        `--- Resumen ---`,
+        ...posts.map(p => `  Post #${p.id}: "${p.title.substring(0, 50)}..."`),
+        '--- Resumen ---',
         `  Total usuarios: ${users.length}`,
-        `  Total posts: ${posts.length}`,
-        `  Posts por usuario (promedio): ${(posts.length / users.length).toFixed(1)}`
+        `  Total posts: ${posts.length}`
       ];
-
-      renderReport('Reporte Combinado', lines);
+      renderReport(`Reporte Combinado (${count} usuarios)`, lines);
     } catch (error) {
-      previewEl.innerHTML = `<p class="text-red-400">Error al generar reporte: ${sanitizeHTML(error.message)}</p>`;
+      previewEl.textContent = `Error generando el reporte: ${error.message}`;
     }
   });
 
+  // 9. Exportar a CSV
+  if (exportCsvBtn) {
+    exportCsvBtn.addEventListener('click', () => {
+      if (!currentReportData) return;
+      triggerDownload(currentReportData, `reporte-${Date.now()}.csv`, 'text/csv');
+    });
+  }
+
+  // 10. Descargar como TXT
   downloadBtn.addEventListener('click', () => {
     if (!currentReportData) return;
-    const blob = new Blob([currentReportData], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `reporte-${Date.now()}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    triggerDownload(currentReportData, `reporte-${Date.now()}.txt`, 'text/plain');
   });
 
-  printBtn.addEventListener('click', () => {
-    window.print();
-  });
+  // 11. Imprimir reporte
+  printBtn.addEventListener('click', () => window.print());
 }
 
 // ================================================================
